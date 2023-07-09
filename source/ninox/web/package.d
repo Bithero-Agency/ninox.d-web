@@ -25,7 +25,7 @@
 
 module ninox.web;
 
-import async;
+import ninox.async;
 import std.socket;
 
 public import ninox.web.config;

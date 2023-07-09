@@ -30,7 +30,7 @@ import ninox.web.config;
 import ninox.web.utils;
 import ninox.web.middlewares;
 import ninox.web.client : NinoxWebRequest;
-import async.utils : Option;
+import ninox.async.utils : Option;
 
 alias MaybeResponse = Option!Response;
 

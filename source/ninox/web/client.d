@@ -25,7 +25,7 @@
 
 module ninox.web.client;
 
-import async.io.socket;
+import ninox.async.io.socket;
 import std.variant;
 import ninox.web.http.client;
 import ninox.web.http.request;

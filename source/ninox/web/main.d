@@ -37,19 +37,19 @@ module ninox.web.main;
  * mixin NinoxWebMain!(test);
  * ---
  * 
- * See_Also: $(REF async.main.AsyncMain)
+ * See_Also: $(REF ninox.async.main.AsyncMain)
  */
 template NinoxWebMain(Modules...) {
 	mixin NinoxWebAsyncMain!Modules;
 
-	import async;
-	import async.main;
+	import ninox.async;
+	import ninox.async.main;
 	mixin AsyncMain;
 }
 
 /** 
  * Used to reduce boilerplate in ninox.d-web projects;
- * Wrapper around $(REF async.main.AsyncLoop); also defines ninox.d-web's startup.
+ * Wrapper around $(REF ninox.async.main.AsyncLoop); also defines ninox.d-web's startup.
  * 
  * Supply it with all modules where ninox.d-web should search for route handlers.
  * 
@@ -64,13 +64,13 @@ template NinoxWebMain(Modules...) {
  * }
  * ---
  * 
- * See_Also: $(REF async.main.AsyncLoop)
+ * See_Also: $(REF ninox.async.main.AsyncLoop)
  */
 template NinoxWebLoop(Modules...) {
 	mixin NinoxWebAsyncMain!Modules;
 
-	import async;
-	import async.main;
+	import ninox.async;
+	import ninox.async.main;
 	mixin AsyncLoop;
 }
 
@@ -80,7 +80,7 @@ template NinoxWebLoop(Modules...) {
  * 
  * Supply it with all modules where ninox.d-web should search for route handlers.
  * 
- * See_Also: $(REF async.main.AsyncLoop) and $(REF async.main.AsyncMain)
+ * See_Also: $(REF ninox.async.main.AsyncLoop) and $(REF ninox.async.main.AsyncMain)
  */
 template NinoxWebAsyncMain(Modules...) {
 	mixin NinoxWebStartup!Modules;
@@ -102,7 +102,7 @@ template NinoxWebAsyncMain(Modules...) {
  * import ninox.web.main;
  * mixin NinoxWebStartup!test;
  * 
- * import async.main;
+ * import ninox.async.main;
  * mixin AsyncMain;
  * 
  * int async_main(string[] args) {
