@@ -1,4 +1,4 @@
-# Miniweb
+# ninox.d-web
 
 A minimal yet complete webframework.
 
@@ -14,9 +14,9 @@ A simple hello world project:
 ```d
 module test;
 
-import miniweb;
-import miniweb.main;
-mixin MiniWebMain!test;
+import ninox.web;
+import ninox.web.main;
+mixin NinoxWebMain!test;
 
 @OnServerStart
 void configureServer(ServerConfig conf) {
@@ -36,11 +36,11 @@ Response returnSomething(HeaderBag headers) {
     return resp;
 }
 ```
-Miniweb has the ability to analyse annotated functions and call them with any order of parameters, as long as minweb supports the type.
+ninox.d-web has the ability to analyse annotated functions and call them with any order of parameters, as long as minweb supports the type.
 
 Currently supported are:
 - `Request` get the raw http request
-- `MiniwebRequest` get the miniweb request
+- `NinoxWebRequest` get the ninox.d-web request
 - `HeaderBag` get the headers of the request
 - `URI` get the uri of the request
 - `QueryParamBag` get the query params of the request
@@ -114,18 +114,18 @@ CustomValue getCustomValue(@PathParam string val) {
 
 ## Serialization
 
-Miniweb supports serialization via three annotations:
-- `@Produces`: sets a list of valid content-types the endpoint can return. Also has the effect that the route is secured through a need for the client to specify the wanted mime-type via the `Accept` header. If nothing is matched a 406 can be returned to indicate that the server could not satisfy the request because of the `Accept` constraint. As a second side-effect, you also can then use **any** custom type as returntype and miniweb's serialization module ensures that the object is properly serialized (if setup that is!)
+ninox.d-web supports serialization via three annotations:
+- `@Produces`: sets a list of valid content-types the endpoint can return. Also has the effect that the route is secured through a need for the client to specify the wanted mime-type via the `Accept` header. If nothing is matched a 406 can be returned to indicate that the server could not satisfy the request because of the `Accept` constraint. As a second side-effect, you also can then use **any** custom type as returntype and ninox.d-web's serialization module ensures that the object is properly serialized (if setup that is!)
 
-- `@Consumes`: sets a list of valid content-types the endpoint can consume. Should only be used when the endpoint can actually recieve data (unlike HEAD and GET request!). It also adds an constraint to ensure that only requests with the desired content-type are getting wired through to the handler. And last but not least it allows to use one otherwise not matched parameter to be used for the body of the request and is deserialized through miniweb's serialization module.
+- `@Consumes`: sets a list of valid content-types the endpoint can consume. Should only be used when the endpoint can actually recieve data (unlike HEAD and GET request!). It also adds an constraint to ensure that only requests with the desired content-type are getting wired through to the handler. And last but not least it allows to use one otherwise not matched parameter to be used for the body of the request and is deserialized through ninox.d-web's serialization module.
 
-Now to setup serialization: either you use the subpackage `miniweb:serialize-d` (see below) or you can implement your own serialization logic. For that simply implement something similar to the following:
+Now to setup serialization: either you use the subpackage `ninox-d_web:serialize-d` (see below) or you can implement your own serialization logic. For that simply implement something similar to the following:
 
 ```d
-import miniweb.serialization;
+import ninox.web.serialization;
 
 // the 'Mapper' UDA serves two purposes: allows to specify the mime-types that serializer applies to,
-// as well as to actually being picked by miniweb as a serializer / mapper.
+// as well as to actually being picked by ninox.d-web as a serializer / mapper.
 @Mapper(["application/json"])
 class JsonMapperImpl {
     // the deserialize function; responsible to deserialize any buffer of data into an instance of T
@@ -147,22 +147,22 @@ Note: both methods **need** to be static in order to work!
 
 ## Subpackages
 
-### miniweb:serialize-d
+### ninox-d_web:serialize-d
 
 A package vital if you want to utilize the [serialize-d](https://code.dlang.org/packages/serialize-d) package in your project to handle serialization.
 
 To use it, simple import it and use any of the provided templates + mixin to generate the glue code:
 ```d
-import miniweb.serialize_d;
+import ninox.web.serialize_d;
 mixin(mkJsonMapper!());
 
-mixin MiniWebMain!(test);
+mixin NinoxWebMain!(test);
 ```
-Since miniweb searches all mappers automatically in the modules you provide to `MiniWebMain` and the `mixin(mkJsonMapper!());` exposes the glue code into your module, everything is setup to simply start using serialization!
+Since ninox.d-web searches all mappers automatically in the modules you provide to `NinoxWebMain` and the `mixin(mkJsonMapper!());` exposes the glue code into your module, everything is setup to simply start using serialization!
 
 Note: the package expects your project to depend on every single serializer you want from serialize-d; so for json support you need to add `serialize-d:json` to your dependencies!
 
-Note: also make sure to setup all mappers via this way **before** you call miniwebs init-code (for example via `MiniWebMain`). Otherwise the glue code dosnt get properly detected and miniweb dosnt pick up on the serializers/mappers.
+Note: also make sure to setup all mappers via this way **before** you call ninox.d-web's init-code (for example via `NinoxWebMain`). Otherwise the glue code dosnt get properly detected and ninox.d-web dosnt pick up on the serializers/mappers.
 
 ## Roadmap
 

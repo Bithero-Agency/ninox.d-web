@@ -16,14 +16,14 @@
  */
 
 /** 
- * Module to hold miniweb's configuration
+ * Module to hold ninox.d-web's configuration
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
  * Copyright: Copyright (C) 2023 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.config;
+module ninox.web.config;
 
 import std.socket;
 
@@ -52,10 +52,10 @@ enum ServerInfo {
 	/// No serverinfo will be given out
 	NONE,
 
-	/// Only the identifier of Miniweb will be used
+	/// Only the identifier of ninox.d-web will be used
 	NO_VERSION,
 
-	/// Full serverinfo of Miniweb; name + version
+	/// Full serverinfo of ninox.d-web; name + version
 	FULL,
 
 	/// Custom serverinfo-string; See $(REF ServerConfig.setCustomServerInfo)

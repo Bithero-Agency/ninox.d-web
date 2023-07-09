@@ -23,10 +23,10 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.cookies;
+module ninox.web.cookies;
 
-import miniweb.http;
-import miniweb.routing;
+import ninox.web.http;
+import ninox.web.routing;
 
 /// Requires the `Cookies` HTTP header to be present.
 enum RequireCookies = RequireHeader("Cookies");

@@ -23,13 +23,13 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.http.request;
+module ninox.web.http.request;
 
-import miniweb.http.headers;
-import miniweb.http.client;
-import miniweb.http.method;
-import miniweb.http.httpversion;
-import miniweb.http.uri;
+import ninox.web.http.headers;
+import ninox.web.http.client;
+import ninox.web.http.method;
+import ninox.web.http.httpversion;
+import ninox.web.http.uri;
 
 /** 
  * Representing a HTTP request message
@@ -38,10 +38,10 @@ class Request {
 	/// The http client the request was parsed from
 	private HttpClient client;
 
-	/// The raw HTTP method; only valid if $(REF method) is $(REF miniweb.http.method.HttpMethod.custom)
+	/// The raw HTTP method; only valid if $(REF method) is $(REF ninox.web.http.method.HttpMethod.custom)
 	private string _raw_method;
 
-	/// The HTTP method; if this is $(REF miniweb.http.method.HttpMethod.custom), the real method is in $(REF raw_method)
+	/// The HTTP method; if this is $(REF ninox.web.http.method.HttpMethod.custom), the real method is in $(REF raw_method)
 	private HttpMethod _method;
 
 	/// The request uri
@@ -85,12 +85,12 @@ class Request {
 		return _raw_method;
 	}
 
-	/// Gets the method of the request; if this returns $(REF miniweb.http.method.HttpMethod.custom) use $(REF getRawMethod) instead
+	/// Gets the method of the request; if this returns $(REF ninox.web.http.method.HttpMethod.custom) use $(REF getRawMethod) instead
 	HttpMethod getMethod() {
 		return _method;
 	}
 
-	/// Gets the method of the request; if this returns $(REF miniweb.http.method.HttpMethod.custom) use $(REF getRawMethod) instead
+	/// Gets the method of the request; if this returns $(REF ninox.web.http.method.HttpMethod.custom) use $(REF getRawMethod) instead
 	@property HttpMethod method() {
 		return _method;
 	}
@@ -149,9 +149,9 @@ Request parseRequest(HttpClient client) {
 		throw new RequestParsingException("requestline has wrong format");
 	}
 
-	debug (miniweb_parseRequest) {
+	debug (ninoxweb_parseRequest) {
 		import std.stdio;
-		writeln("[miniweb.http.parseRequest] requestLine: ", requestLine);
+		writeln("[ninox.web.http.parseRequest] requestLine: ", requestLine);
 	}
 
 	r._method = httpMethodFromString(requestLine[0]);
@@ -164,9 +164,9 @@ Request parseRequest(HttpClient client) {
 	// start header parsing
 	while (true) {
 		auto line = client.readLine();
-		debug (miniweb_parseRequest) {
+		debug (ninoxweb_parseRequest) {
 			import std.stdio;
-			writeln("[miniweb.http.parseRequest] got headerline: ", line);
+			writeln("[ninox.web.http.parseRequest] got headerline: ", line);
 		}
 
 		if (line.length < 1) { break; }
@@ -193,9 +193,9 @@ Request parseRequest(HttpClient client) {
 			throw new RequestParsingException("header line has wrong format");
 		}
 
-		debug (miniweb_parseRequest) {
+		debug (ninoxweb_parseRequest) {
 			import std.stdio;
-			writeln("[miniweb.http.parseRequest] got header: key=", key, "|value=", value);
+			writeln("[ninox.web.http.parseRequest] got header: key=", key, "|value=", value);
 		}
 
 		import std.string : toLower;

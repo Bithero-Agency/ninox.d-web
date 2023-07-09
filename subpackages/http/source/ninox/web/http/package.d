@@ -23,15 +23,15 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.http;
+module ninox.web.http;
 
-public import miniweb.http.headers;
-public import miniweb.http.request;
-public import miniweb.http.response;
-public import miniweb.http.method;
-public import miniweb.http.httpversion;
-public import miniweb.http.body;
-public import miniweb.http.uri;
+public import ninox.web.http.headers;
+public import ninox.web.http.request;
+public import ninox.web.http.response;
+public import ninox.web.http.method;
+public import ninox.web.http.httpversion;
+public import ninox.web.http.body;
+public import ninox.web.http.uri;
 
 import std.datetime.systime : SysTime;
 

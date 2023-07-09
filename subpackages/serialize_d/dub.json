@@ -4,12 +4,12 @@
 	],
 	"copyright": "Copyright © 2023, Mai-Lapyst",
 	"dependencies": {
-		"miniweb": {
+		"ninox-d_web": {
 			"path": ".."
 		},
 		"serialize-d": "~>1.0.0"
 	},
-	"description": "Integration of the serialize-d package into miniweb",
+	"description": "Integration of the serialize-d package into ninox.d-web",
 	"license": "AGPL-3.0-or-later",
 	"name": "serialize-d"
 }

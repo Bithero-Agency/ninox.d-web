@@ -1,7 +1,7 @@
-module miniweb.serialization;
+module ninox.web.serialization;
 
-import miniweb.client;
-import miniweb.http.response;
+import ninox.web.client;
+import ninox.web.http.response;
 
 import std.meta : AliasSeq;
 
@@ -33,8 +33,8 @@ void checkMappers(Modules...)() {
     }
 }
 
-T requestbody_deserialize(T, Modules...)(MiniwebRequest req) {
-    import miniweb.utils : extractBaseMime;
+T requestbody_deserialize(T, Modules...)(NinoxWebRequest req) {
+    import ninox.web.utils : extractBaseMime;
 
     string base_mime = extractBaseMime(req.consumes);
 
@@ -46,10 +46,10 @@ T requestbody_deserialize(T, Modules...)(MiniwebRequest req) {
 
         enum types = udas[0].types;
 
-        import miniweb.utils : BuildImportCodeForType;
+        import ninox.web.utils : BuildImportCodeForType;
         enum apply_mapper_deserialize =
             "if (" ~ types.stringof ~ ".canFind(base_mime)) {" ~
-                "debug (miniweb_debug_mappers) {" ~
+                "debug (ninoxweb_debug_mappers) {" ~
                     "import std.stdio;" ~ 
                     "writeln(\"[requestbody_deserialize] use `" ~ fullyQualifiedName!clazz ~ "` for mime '\" ~ base_mime ~ \"'\");" ~
                 "}" ~
@@ -70,7 +70,7 @@ T requestbody_deserialize(T, Modules...)(MiniwebRequest req) {
 }
 
 Response serialize_responsevalue(T, Modules...)(string accepted_product, auto ref T value) {
-    import miniweb.utils : extractBaseMime;
+    import ninox.web.utils : extractBaseMime;
 
     string base_mime = extractBaseMime(accepted_product);
 
@@ -82,10 +82,10 @@ Response serialize_responsevalue(T, Modules...)(string accepted_product, auto re
 
         enum types = udas[0].types;
 
-        import miniweb.utils : BuildImportCodeForType;
+        import ninox.web.utils : BuildImportCodeForType;
         enum apply_mapper_serialize =
             "if (" ~ types.stringof ~ ".canFind(base_mime)) {" ~
-                "debug (miniweb_debug_mappers) {" ~
+                "debug (ninoxweb_debug_mappers) {" ~
                     "import std.stdio;" ~ 
                     "writeln(\"[serialize_responsevalue] use `" ~ fullyQualifiedName!clazz ~ "` for mime '\" ~ base_mime ~ \"'\");" ~
                 "}" ~
@@ -99,7 +99,7 @@ Response serialize_responsevalue(T, Modules...)(string accepted_product, auto re
 
     import std.traits;
     import std.algorithm : canFind;
-    import miniweb.http.response;
+    import ninox.web.http.response;
 
     static foreach (mod; Modules) {
         static foreach (clazz; getSymbolsByUDA!(mod, Mapper)) {

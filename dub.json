@@ -1,12 +1,12 @@
 {
-	"name": "miniweb",
+	"name": "ninox-d_web",
 	"authors": [
 		"Mai-Lapyst"
 	],
 	"copyright": "Copyright © 2023, Mai-Lapyst",
 	"dependencies": {
 		"miniasync": "~>0.3.1",
-		"miniweb:http": {
+		"ninox-d_web:http": {
 			"path": "./subpackages/http"
 		}
 	},

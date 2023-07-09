@@ -16,26 +16,26 @@
  */
 
 /** 
- * Module to hold miniweb's http client
+ * Module to hold ninox.d-web's http client
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
  * Copyright: Copyright (C) 2023 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.client;
+module ninox.web.client;
 
 import async.io.socket;
 import std.variant;
-import miniweb.http.client;
-import miniweb.http.request;
+import ninox.web.http.client;
+import ninox.web.http.request;
 
 /** 
- * Miniweb's HTTP Client
+ * ninox.d-web's HTTP Client
  * 
- * See_Also: $(REF miniweb.http.client.BaseHttpClient)
+ * See_Also: $(REF ninox.web.http.client.BaseHttpClient)
  */
-class MiniWebHttpClient : BaseHttpClient {
+class NinoxWebHttpClient : BaseHttpClient {
 	/// The underlaying socket
 	private AsyncSocket sock;
 
@@ -59,7 +59,7 @@ class MiniWebHttpClient : BaseHttpClient {
 
 }
 
-class MiniwebRequest {
+class NinoxWebRequest {
 	private Request _http_request;
 
 	/// Storage for path parameters

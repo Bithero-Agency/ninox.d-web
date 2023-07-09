@@ -23,7 +23,7 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.http.client;
+module ninox.web.http.client;
 
 /**
  * Interface for HTTP clients; Most implementers actualy want to extend $(REF BaseHttpClient)

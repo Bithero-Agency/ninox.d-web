@@ -1,39 +1,91 @@
-/*
- * Copyright (C) 2023 Mai-Lapyst
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/** 
- * Module to hold header related code
- * 
- * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
- * Copyright: Copyright (C) 2023 Mai-Lapyst
- * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
- */
-
-module miniweb.http.headers;
-
-import std.string : toLower;
+module ninox.web.http.uri;
 
 /**
- * Stores headers for an HTTP Message, all keys are case insensitive.
- * 
- * Note: all keys are automatically transformed into lowercase to ensure the case insensitivity.
+ * Holds an URI; effectivly just a container/wrapper but as a distinct type so we can better work with it.
+ * Utilizes $(REF std.uri) for parsing.
  */
-class HeaderBag {
-	/// internal assocative array storing the headers
+class URI {
+	private string _path;
+	private QueryParamBag _queryparams;
+
+	private this() {}
+
+	/// Parses the given string as uri
+	this(string str) {
+		import std.uri;
+		import std.string : indexOf, split;
+		str = std.uri.decode(str);
+
+		this._queryparams = new QueryParamBag();
+
+		auto i = str.indexOf("?");
+		if (i >= 0) {
+			this._path = str[0 .. i];
+			str = str[i+1 .. $];
+
+			auto entries = str.split("&");
+			foreach (e; entries) {
+				if (e.length <= 0) {
+					continue;
+				}
+
+				auto j = e.indexOf("=");
+				if (j >= 0) {
+					this._queryparams.set( e[0..j], std.uri.decodeComponent(e[j+1..$]) );
+				} else {
+					this._queryparams.set( e, "" );
+				}
+			}
+		} else {
+			this._path = str;
+		}
+	}
+
+	/// Encodes the uri back into a string
+	string encode() {
+		import std.uri;
+		if (_queryparams.map.length <= 0) {
+			return std.uri.encode(_path);
+		}
+
+		string querystr = "";
+		foreach (key, values; _queryparams.map) {
+			foreach (value; values) {
+				querystr ~= key ~ "=" ~ std.uri.encodeComponent(value) ~ "&";
+			}
+		}
+		return std.uri.encode(_path) ~ "?" ~ querystr[0 .. $-1];
+	}
+
+	/// The path of the uri
+	@property string path() {
+		return _path;
+	}
+
+	/// The query params of the uri
+	@property QueryParamBag queryparams() {
+		return _queryparams;
+	}
+
+	/// Parses the given string as uri
+	static URI parse(string str) {
+		return new URI(str);
+	}
+}
+
+unittest {
+	URI u = new URI("foo/bar?a=42&b=some%20%26str");
+	assert(u._path == "foo/bar");
+	assert(u._queryparams.map["a"] == ["42"]);
+	assert(u._queryparams.map["b"] == ["some &str"]);
+	assert(u.encode(), "foo/bar?a=42&b=some%20%26str");
+}
+
+/**
+ * Stores query params for an HTTP URL, all keys are case sensitive.
+ */
+class QueryParamBag {
+	/// internal assocative array storing the params
 	private string[][string] map;
 
 	/**
@@ -45,7 +97,7 @@ class HeaderBag {
 	 * Returns: true if the key is set, false otherwise
 	 */
 	bool has(string key) {
-		auto p = key.toLower() in map;
+		auto p = key in map;
 		return p !is null;
 	}
 
@@ -59,7 +111,7 @@ class HeaderBag {
 	 * Returns: the values for the key or a array with `defaultValue` as single element if no values are present.
 	 */
 	string[] get(string key, string defaultValue = "") {
-		auto p = key.toLower() in map;
+		auto p = key in map;
 		if (p !is null) {
 			return *p;
 		}
@@ -87,7 +139,7 @@ class HeaderBag {
 	 *   values = the values to set
 	 */
 	void set(string key, string[] values) {
-		map[key.toLower()] = values;
+		map[key] = values;
 	}
 
 	/** 
@@ -98,7 +150,7 @@ class HeaderBag {
 	 *   value = the value to set
 	 */
 	void set(string key, string value) {
-		map[key.toLower()] = [ value ];
+		map[key] = [ value ];
 	}
 
 	/** 
@@ -109,7 +161,6 @@ class HeaderBag {
 	 *   values = the values to append
 	 */
 	void append(string key, string[] values) {
-		key = key.toLower();
 		if (!has(key)) {
 			map[key] = values;
 		} else {
@@ -135,30 +186,6 @@ class HeaderBag {
 	 *   key = the key to unset
 	 */
 	void unset(string key) {
-		map.remove(key.toLower());
-	}
-
-	/** 
-	 * Iterates over all key`s and run the given delegate on it and the values
-	 * 
-	 * Params:
-	 *   dg = delegate to call for each header key
-	 */
-	void foreachHeader(void delegate(string, string[]) dg) {
-		foreach (key, value; map) {
-			dg(key, value);
-		}
-	}
-
-	/** 
-	 * Iterates over all key`s and run the given function on it and the values
-	 * 
-	 * Params:
-	 *   fn = function to call for each header key
-	 */
-	void foreachHeader(void function(string, string[]) fn) {
-		foreach (key, value; map) {
-			fn(key, value);
-		}
+		map.remove(key);
 	}
 }

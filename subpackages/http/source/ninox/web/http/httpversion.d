@@ -23,7 +23,7 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.http.httpversion;
+module ninox.web.http.httpversion;
 
 /** 
  * The http version a request has been or response should be encoded with.

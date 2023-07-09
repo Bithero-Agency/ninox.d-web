@@ -2,7 +2,7 @@
 docs.json
 __dummy.html
 docs/
-/miniweb
+/ninoxweb
 *.so
 *.dylib
 *.dll

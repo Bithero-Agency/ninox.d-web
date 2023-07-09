@@ -23,10 +23,10 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.http.body;
+module ninox.web.http.body;
 
-import miniweb.http.headers;
-import miniweb.http.client;
+import ninox.web.http.headers;
+import ninox.web.http.client;
 
 import std.json;
 

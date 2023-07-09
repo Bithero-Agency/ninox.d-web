@@ -23,24 +23,24 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.main;
+module ninox.web.main;
 
 /** 
- * Used to reduce boilerplate in miniweb projects; defines an async main and calls miniweb's startup.
+ * Used to reduce boilerplate in ninox.d-web projects; defines an async main and calls ninox.d-web's startup.
  * 
- * Supply it with all modules where miniweb should search for route handlers.
+ * Supply it with all modules where ninox.d-web should search for route handlers.
  * 
  * Example:
  * ---
  * module test;
- * import miniweb.main;
- * mixin MiniWebMain!(test);
+ * import ninox.web.main;
+ * mixin NinoxWebMain!(test);
  * ---
  * 
  * See_Also: $(REF async.main.AsyncMain)
  */
-template MiniWebMain(Modules...) {
-	mixin MiniWebAsyncMain!Modules;
+template NinoxWebMain(Modules...) {
+	mixin NinoxWebAsyncMain!Modules;
 
 	import async;
 	import async.main;
@@ -48,16 +48,16 @@ template MiniWebMain(Modules...) {
 }
 
 /** 
- * Used to reduce boilerplate in miniweb projects;
- * Wrapper around $(REF async.main.AsyncLoop); also defines miniweb's startup.
+ * Used to reduce boilerplate in ninox.d-web projects;
+ * Wrapper around $(REF async.main.AsyncLoop); also defines ninox.d-web's startup.
  * 
- * Supply it with all modules where miniweb should search for route handlers.
+ * Supply it with all modules where ninox.d-web should search for route handlers.
  * 
  * Example:
  * ---
  * module test;
- * import miniweb.main;
- * mixin MiniWebLoop!(test);
+ * import ninox.web.main;
+ * mixin NinoxWebLoop!(test);
  * 
  * int main(string[] args) {
  *     return mainAsyncLoop();
@@ -66,8 +66,8 @@ template MiniWebMain(Modules...) {
  * 
  * See_Also: $(REF async.main.AsyncLoop)
  */
-template MiniWebLoop(Modules...) {
-	mixin MiniWebAsyncMain!Modules;
+template NinoxWebLoop(Modules...) {
+	mixin NinoxWebAsyncMain!Modules;
 
 	import async;
 	import async.main;
@@ -75,49 +75,49 @@ template MiniWebLoop(Modules...) {
 }
 
 /** 
- * Used to reduce boilerplate in miniweb projects;
- * Defines a async main with miniweb's startup.
+ * Used to reduce boilerplate in ninox.d-web projects;
+ * Defines a async main with ninox.d-web's startup.
  * 
- * Supply it with all modules where miniweb should search for route handlers.
+ * Supply it with all modules where ninox.d-web should search for route handlers.
  * 
  * See_Also: $(REF async.main.AsyncLoop) and $(REF async.main.AsyncMain)
  */
-template MiniWebAsyncMain(Modules...) {
-	mixin MiniWebStartup!Modules;
+template NinoxWebAsyncMain(Modules...) {
+	mixin NinoxWebStartup!Modules;
 
 	int async_main() {
-		return miniWebStartup();
+		return ninoxWebStartup();
 	}
 }
 
 /** 
- * Used to reduce boilerplate in miniweb projects;
- * Defines miniweb's startup.
+ * Used to reduce boilerplate in ninox.d-web projects;
+ * Defines ninox.d-web's startup.
  * 
- * Supply it with all modules where miniweb should search for route handlers.
+ * Supply it with all modules where ninox.d-web should search for route handlers.
  * 
  * Example:
  * ---
  * module test;
- * import miniweb.main;
- * mixin MiniWebStartup!test;
+ * import ninox.web.main;
+ * mixin NinoxWebStartup!test;
  * 
  * import async.main;
  * mixin AsyncMain;
  * 
  * int async_main(string[] args) {
- *     return miniWebStartup();
+ *     return ninoxWebStartup();
  * }
  * ---
  */
-template MiniWebStartup(Modules...) {
+template NinoxWebStartup(Modules...) {
 	import std.meta : AliasSeq;
 	import std.traits : getSymbolsByUDA, isFunction, ReturnType, Parameters;
-	import miniweb.config;
+	import ninox.web.config;
 
 	alias allMods = AliasSeq!(Modules);
 
-	int miniWebStartup() {
+	int ninoxWebStartup() {
 		ServerConfig conf = new ServerConfig();
 
 		foreach (mod; allMods) {
@@ -132,17 +132,17 @@ template MiniWebStartup(Modules...) {
 					fn();
 				}
 				else {
-					assert(false, "`" ~ __traits(identifier, fn) ~ "` needs either have no parameters or only one of type `miniweb.config.ServerConfig`");
+					assert(false, "`" ~ __traits(identifier, fn) ~ "` needs either have no parameters or only one of type `ninox.web.config.ServerConfig`");
 				}
 			}
 		}
 
-		import miniweb.serialization;
+		import ninox.web.serialization;
 		checkMappers!(allMods);
 
 		Router router = initRouter!(allMods)(conf);
 
-		int exitCode = miniwebRunServer(conf, router);
+		int exitCode = ninoxwebRunServer(conf, router);
 
 		foreach (mod; allMods) {
 			foreach (fn; getSymbolsByUDA!(mod, OnServerShutdown)) {
@@ -156,7 +156,7 @@ template MiniWebStartup(Modules...) {
 					fn();
 				}
 				else {
-					assert(false, "`" ~ __traits(identifier, fn) ~ "` needs either have no parameters or only one of type `miniweb.config.ServerConfig`");
+					assert(false, "`" ~ __traits(identifier, fn) ~ "` needs either have no parameters or only one of type `ninox.web.config.ServerConfig`");
 				}
 			}
 		}

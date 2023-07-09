@@ -23,11 +23,11 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.middlewares;
+module ninox.web.middlewares;
 
-import miniweb.client : MiniwebRequest;
-import miniweb.http.response;
-import miniweb.routing : MaybeResponse;
+import ninox.web.client : NinoxWebRequest;
+import ninox.web.http.response;
+import ninox.web.routing : MaybeResponse;
 
 /**
  * UDA to apply to a function to register it as a middleware handler
@@ -40,11 +40,11 @@ struct RegisterMiddleware {
  * UDA to apply to a route handler to specify which middleware to apply
  */
 struct Middleware {
-    this(MaybeResponse delegate(MiniwebRequest) dg) {
+    this(MaybeResponse delegate(NinoxWebRequest) dg) {
         this._kind = Kind.DG;
         this.dg = dg;
     }
-    this(MaybeResponse function(MiniwebRequest) fn) {
+    this(MaybeResponse function(NinoxWebRequest) fn) {
         this._kind = Kind.FN;
         this.fn = fn;
     }
@@ -93,7 +93,7 @@ struct Middleware {
      * 
      * Throws: Exception if trying to all a named middleware
      */
-    MaybeResponse opCall(MiniwebRequest req) {
+    MaybeResponse opCall(NinoxWebRequest req) {
         final switch (_kind) {
             case Kind.NO:
             case Kind.NAMED:
@@ -109,7 +109,7 @@ private:
     Kind _kind = Kind.NO;
     union {
         string _name;
-        MaybeResponse delegate(MiniwebRequest) dg;
-        MaybeResponse function(MiniwebRequest) fn;
+        MaybeResponse delegate(NinoxWebRequest) dg;
+        MaybeResponse function(NinoxWebRequest) fn;
     }
 }

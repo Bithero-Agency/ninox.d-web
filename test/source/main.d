@@ -1,15 +1,15 @@
 module test;
 
-import miniweb;
-import miniweb.serialization;
+import ninox.web;
+import ninox.web.serialization;
 
 import std.stdio;
 import std.json;
 
-import miniweb.serialize_d;
-mixin(mkJsonMapper!());
+//import ninox.web.serialize_d;
+//mixin(mkJsonMapper!());
 
-mixin MiniWebMain!(test);
+mixin NinoxWebMain!(test);
 
 @RegisterMiddleware("a")
 MaybeResponse myfun() {

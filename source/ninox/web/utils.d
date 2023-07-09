@@ -23,7 +23,7 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.utils;
+module ninox.web.utils;
 
 /** 
  * Accquires informations about parameters.
@@ -219,6 +219,6 @@ template BuildImportCodeForType(alias T) {
 }
 
 unittest {
-    import miniweb.serialization : Mapper;
-    static assert (BuildImportCodeForType!Mapper == "imported!\"miniweb.serialization\".Mapper");
+    import ninox.web.serialization : Mapper;
+    static assert (BuildImportCodeForType!Mapper == "imported!\"ninox.web.serialization\".Mapper");
 }

@@ -1,12 +1,12 @@
 module app;
 
-import miniweb;
-import miniweb.cookies;
+import ninox.web;
+import ninox.web.cookies;
 
 import std.stdio;
 import std.socket;
 
-mixin MiniWebMain!app;
+mixin NinoxWebMain!app;
 
 @OnServerStart
 void configureServer(ServerConfig conf) {

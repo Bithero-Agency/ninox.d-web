@@ -23,20 +23,20 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb;
+module ninox.web;
 
 import async;
 import std.socket;
 
-public import miniweb.config;
-public import miniweb.main;
-public import miniweb.routing;
-public import miniweb.http;
-public import miniweb.client;
-public import miniweb.middlewares;
+public import ninox.web.config;
+public import ninox.web.main;
+public import ninox.web.routing;
+public import ninox.web.http;
+public import ninox.web.client;
+public import ninox.web.middlewares;
 
 /// Handles one request
-private void handleRequest(MiniWebHttpClient client, Router router, ServerConfig conf, Request req) {
+private void handleRequest(NinoxWebHttpClient client, Router router, ServerConfig conf, Request req) {
 	Response resp = router.route(req, conf);
 	if (resp is null) {
 		import std.stdio;
@@ -57,10 +57,10 @@ private void handleRequest(MiniWebHttpClient client, Router router, ServerConfig
 	final switch (conf.publishServerInfo) {
 		case ServerInfo.NONE: break;
 		case ServerInfo.NO_VERSION:
-			resp.headers.set("Server", "MiniWeb-d");
+			resp.headers.set("Server", "ninox-d_web");
 			break;
 		case ServerInfo.FULL:
-			resp.headers.set("Server", "MiniWeb-d; v0.1.0");
+			resp.headers.set("Server", "ninox-d_web; v0.1.0");
 			break;
 		case ServerInfo.CUSTOM:
 			resp.headers.set("Server", conf.customServerInfo);
@@ -86,7 +86,7 @@ private void handleRequest(MiniWebHttpClient client, Router router, ServerConfig
  */
 private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 	try {
-		auto client = new MiniWebHttpClient(sock);
+		auto client = new NinoxWebHttpClient(sock);
 
 		Request req = parseRequest(client);
 		handleRequest(client, router, conf, req);
@@ -114,15 +114,15 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 }
 
 /** 
- * Mainloop of miniweb; listens for connections and dispatches them
+ * Mainloop of ninox.d-web; listens for connections and dispatches them
  * 
  * Params:
  *   conf = the server config
  *   r = the router
  * 
- * Returns: exitstatus of miniweb
+ * Returns: exitstatus of ninox.d-web
  */
-int miniwebRunServer(ServerConfig conf, Router r) {
+int ninoxwebRunServer(ServerConfig conf, Router r) {
 	auto listener = new AsyncSocket(AddressFamily.INET, SocketType.STREAM);
 	listener.bind(conf.addr);
 	listener.listen();
@@ -130,9 +130,9 @@ int miniwebRunServer(ServerConfig conf, Router r) {
 	bool isRunning = true;
 	while (isRunning) {
 		AsyncSocket client = listener.accept().await();
-		debug(miniweb_client_accept) {
+		debug(ninoxweb_client_accept) {
 			import std.stdio;
-			writeln("[miniwebRunServer] accepting client ", client.remoteAddress());
+			writeln("[ninoxwebRunServer] accepting client ", client.remoteAddress());
 		}
 
 		// TODO: setKeepAlive()

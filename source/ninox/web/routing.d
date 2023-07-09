@@ -23,13 +23,13 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.routing;
+module ninox.web.routing;
 
-import miniweb.http;
-import miniweb.config;
-import miniweb.utils;
-import miniweb.middlewares;
-import miniweb.client : MiniwebRequest;
+import ninox.web.http;
+import ninox.web.config;
+import ninox.web.utils;
+import ninox.web.middlewares;
+import ninox.web.client : NinoxWebRequest;
 import async.utils : Option;
 
 alias MaybeResponse = Option!Response;
@@ -162,7 +162,7 @@ struct Consumes {
 
 /// Checks a condition if the request can be handled
 interface Matcher {
-    bool matches(MiniwebRequest req, ref RoutingStore store);
+    bool matches(NinoxWebRequest req, ref RoutingStore store);
 }
 
 /// Checks if the request matches a specific route
@@ -226,7 +226,7 @@ private class RouteMatcher : Matcher {
         this.re = regex(res);
     }
 
-    bool matches(MiniwebRequest req, ref RoutingStore store) {
+    bool matches(NinoxWebRequest req, ref RoutingStore store) {
         import std.regex : matchFirst, Captures;
         auto res = matchFirst(req.http.uri.path, this.re);
         if (res) {
@@ -247,7 +247,7 @@ private class MethodMatcher : Matcher {
         this.method = method;
     }
 
-    bool matches(MiniwebRequest req, ref RoutingStore store) {
+    bool matches(NinoxWebRequest req, ref RoutingStore store) {
         if (req.http.getMethod() != method.method) {
             store.non_match_cause = NonMatchCause.Method;
             return false;
@@ -271,7 +271,7 @@ private class HeaderMatcher : Matcher {
         this.name = name;
     }
 
-    bool matches(MiniwebRequest req, ref RoutingStore store) {
+    bool matches(NinoxWebRequest req, ref RoutingStore store) {
         if (req.http.headers.has(name)) {
             return true;
         }
@@ -410,7 +410,7 @@ private class AcceptMatcher : BaseMimeMatcher {
         super(products);
     }
 
-    bool matches(MiniwebRequest req, ref RoutingStore store) {
+    bool matches(NinoxWebRequest req, ref RoutingStore store) {
         if (!req.http.headers.has("Accept")) {
             store.non_match_cause = NonMatchCause.Accept;
             return false;
@@ -435,7 +435,7 @@ private class ContentTypeMatcher : BaseMimeMatcher {
         super(types);
     }
 
-    bool matches(MiniwebRequest req, ref RoutingStore store) {
+    bool matches(NinoxWebRequest req, ref RoutingStore store) {
         if (!req.http.headers.has("Content-Type")) {
             // TODO: make a error code
             return false;
@@ -460,16 +460,16 @@ private class ContentTypeMatcher : BaseMimeMatcher {
 
 /// Container to store delegates / functions which are route handlers with the returntype `T`.
 private struct Callable(T) {
-    void set(T function(MiniwebRequest req) fn) pure nothrow @nogc @safe {
+    void set(T function(NinoxWebRequest req) fn) pure nothrow @nogc @safe {
         () @trusted { this.fn = fn; }();
         this.kind = Kind.FN;
     }
-    void set(T delegate(MiniwebRequest req) dg) pure nothrow @nogc @safe {
+    void set(T delegate(NinoxWebRequest req) dg) pure nothrow @nogc @safe {
         () @trusted { this.dg = dg; }();
         this.kind = Kind.DG;
     }
 
-    T opCall(MiniwebRequest req) {
+    T opCall(NinoxWebRequest req) {
         final switch (this.kind) {
             case Kind.FN: return fn(req);
             case Kind.DG: return dg(req);
@@ -480,14 +480,14 @@ private:
 	enum Kind { NO, FN, DG }
 	Kind kind = Kind.NO;
 	union {
-		T function(MiniwebRequest req) fn;
-		T delegate(MiniwebRequest req) dg;
+		T function(NinoxWebRequest req) fn;
+		T delegate(NinoxWebRequest req) dg;
 	}
 }
 
 /// Container for route handlers
 private struct Handler {
-    Response opCall(MiniwebRequest req) {
+    Response opCall(NinoxWebRequest req) {
         final switch (kind) {
             case Kind.NONE:
                 throw new Exception("Tried to call unintialized handler!");
@@ -529,7 +529,7 @@ private struct RouteEntry {
     Handler handler;
     DList!Middleware middlewares;
 
-    bool matches(MiniwebRequest req, ref RoutingStore store) {
+    bool matches(NinoxWebRequest req, ref RoutingStore store) {
         foreach (m; matchers) {
             if (!m.matches(req, store)) {
                 return false;
@@ -559,7 +559,7 @@ class Router {
     private Callable!MaybeResponse[string] middlewares;
 
     Response route(Request http_req, ServerConfig conf) {
-        MiniwebRequest req = new MiniwebRequest(http_req);
+        NinoxWebRequest req = new NinoxWebRequest(http_req);
 
         RoutingStore store;
         foreach (ent; routes) {
@@ -610,13 +610,13 @@ class Router {
         return null;
     }
 
-    void addRoute(T)(Matcher[] matchers, DList!Middleware mws, T delegate(MiniwebRequest) dg) {
+    void addRoute(T)(Matcher[] matchers, DList!Middleware mws, T delegate(NinoxWebRequest) dg) {
         Callable!T cb;
         cb.set(dg);
         routes ~= RouteEntry(matchers, Handler.from(cb), mws);
     }
 
-    void addMiddleware(string name, MaybeResponse delegate(MiniwebRequest) dg) {
+    void addMiddleware(string name, MaybeResponse delegate(NinoxWebRequest) dg) {
         Callable!MaybeResponse cb;
         cb.set(dg);
         middlewares[name] = cb;
@@ -634,10 +634,10 @@ class Router {
         };
         routes.sort!compareRoute;
 
-        debug (minweb_router_sort) {
-            writeln("[miniweb.routing.Router.sortRoutes] Sorted routes:");
+        debug (ninoxweb_router_sort) {
+            writeln("[ninox.web.routing.Router.sortRoutes] Sorted routes:");
             foreach (r; routes) {
-                writeln("[miniweb.routing.Router.sortRoutes]  - ", r);
+                writeln("[ninox.web.routing.Router.sortRoutes]  - ", r);
             }
         }
     }
@@ -649,7 +649,7 @@ class Router {
  * 
  * Params:
  *   fn = the route handler function
- *   paramInfos = parameterinfos of `fn`; aqquired from $(REF miniweb.utils.GetParameterInfo)
+ *   paramInfos = parameterinfos of `fn`; aqquired from $(REF ninox.web.utils.GetParameterInfo)
  */
 private template MakeCallDispatcher(alias fn) {
     import std.traits;
@@ -675,7 +675,7 @@ private template MakeCallDispatcher(alias fn) {
             alias paramUdas = __traits(getAttributes, paramTy);
 
             import std.conv : to;
-            debug(miniweb_mkCallDisp) {
+            debug(ninoxweb_mkCallDisp) {
                 pragma(
                     msg,
                     "- fn: " ~ fullyQualifiedName!fn
@@ -694,13 +694,13 @@ private template MakeCallDispatcher(alias fn) {
                 );
             }
 
-            import miniweb.utils : filterUDAs, containsUDA;
+            import ninox.web.utils : filterUDAs, containsUDA;
             import std.meta : AliasSeq;
 
             static if (is(plainParamTy == Request)) {
                 enum Impl = "req.http," ~ tail;
             }
-            else static if (is(plainParamTy == MiniwebRequest)) {
+            else static if (is(plainParamTy == NinoxWebRequest)) {
                 enum Impl = "req," ~ tail;
             }
             else static if (is(plainParamTy == HeaderBag)) {
@@ -859,9 +859,9 @@ private template MakeCallDispatcher(alias fn) {
             }
             else static if (hasUDA!(fn, Consumes)) {
                 static assert (allowConsumes, "Cannot have two parameters be deserialized from the body of the request: `" ~ paramId ~ "` on `" ~ fullyQualifiedName!fn ~ "`");
-                import miniweb.utils;
+                import ninox.web.utils;
                 enum Impl =
-                    "imported!\"miniweb.serialization\".requestbody_deserialize!( " ~ BuildImportCodeForType!(paramTy) ~ ", Modules )(req),"
+                    "imported!\"ninox.web.serialization\".requestbody_deserialize!( " ~ BuildImportCodeForType!(paramTy) ~ ", Modules )(req),"
                     ~ Impl!(i+1, false);
             }
             else {
@@ -951,7 +951,7 @@ private void addRoute(alias fn, string args, Modules...)(Router r, DList!Middlew
         matchers ~= new ContentTypeMatcher(mixin("[" ~ CollectConsumesAttrs!() ~ "]"));
     }
 
-    r.addRoute(matchers, middlewares, (MiniwebRequest req) {
+    r.addRoute(matchers, middlewares, (NinoxWebRequest req) {
         import std.json : JSONValue;
 
         alias retTy = ReturnType!fn;
@@ -961,8 +961,8 @@ private void addRoute(alias fn, string args, Modules...)(Router r, DList!Middlew
             mixin( "return fn(" ~ args ~ ");" );
         } else static if (is(retTy == JSONValue)) {
             mixin(
-                "import miniweb.http.response;" ~
-                "import miniweb.http.body;" ~
+                "import ninox.web.http.response;" ~
+                "import ninox.web.http.body;" ~
                 "auto resp = new Response(HttpResponseCode.OK_200);" ~
                 "resp.responseBody = new StdJsonBody( fn(" ~ args ~ ") );" ~
                 "return resp;"
@@ -983,12 +983,12 @@ private void addRoute(alias fn, string args, Modules...)(Router r, DList!Middlew
                 mixin( "return fn(" ~ args ~ ").toResponse();" );
             } else static if (is(toResponseParams == AliasSeq!(Request))) {
                 mixin( "return fn(" ~ args ~ ").toResponse(req.http);" );
-            } else static if (is(toResponseParams == AliasSeq!(MiniwebRequest))) {
+            } else static if (is(toResponseParams == AliasSeq!(NinoxWebRequest))) {
                 mixin( "return fn(" ~ args ~ ").toResponse(req);" );
             }
         } else static if (hasUDA!(fn, Produces)) {
             auto val = mixin("fn(" ~ args ~ ")");
-            import miniweb.serialization;
+            import ninox.web.serialization;
             return serialize_responsevalue!(typeof(val), Modules)(req.accepted_product, val);
         } else {
             static assert(0, "`" ~ fullyQualifiedName!fn ~ "` needs either void, Response or a type that has a toResponse method as return type");
@@ -1031,7 +1031,7 @@ Router initRouter(Modules...)(ServerConfig conf) {
                 }
                 static if (is(ReturnType!fn == Option!Response)) {
                     pragma(msg, "Creating middleware handler on `" ~ fullyQualifiedName!fn ~ "` named '" ~ uda.name ~ "', calling with: `" ~ args ~ "`");
-                    r.addMiddleware(uda.name, (MiniwebRequest req) {
+                    r.addMiddleware(uda.name, (NinoxWebRequest req) {
                         mixin( "return fn(" ~ args ~ ");" );
                     });
                 }

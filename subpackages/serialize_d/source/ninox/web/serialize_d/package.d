@@ -16,19 +16,19 @@
  */
 
 /** 
- * Module to integrate serialize-d into miniweb
+ * Module to integrate serialize-d into ninox.d-web
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
  * Copyright: Copyright (C) 2023 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.serialize_d;
+module ninox.web.serialize_d;
 
 template mkJsonMapper() {
     static if (__traits(compiles, imported!"serialize_d.json.serializer".JsonMapper)) {
         enum mkJsonMapper = "
-            @( imported!\"miniweb.serialization\".Mapper([\"application/json\"]) )
+            @( imported!\"ninox.web.serialization\".Mapper([\"application/json\"]) )
             class JsonMapperImpl {
                 static T deserialize(T)(void[] buffer) {
                     import serialize_d.json.serializer;

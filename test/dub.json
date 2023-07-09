@@ -6,11 +6,11 @@
     "copyright": "Copyright © 2023, Mai-Lapyst",
     "license": "AGPL-3.0-or-later",
     "dependencies": {
-        "miniweb": {
+        "ninox-d_web": {
             "path": ".."
         },
         "serialize-d:json": "~>1.0.0",
-        "miniweb:serialize-d": {
+        "ninox-d_web:serialize-d": {
             "path": "../subpackages/serialize_d"
         }
     }

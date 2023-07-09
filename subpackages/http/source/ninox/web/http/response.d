@@ -23,12 +23,12 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.http.response;
+module ninox.web.http.response;
 
-import miniweb.http.httpversion;
-import miniweb.http.client;
-import miniweb.http.headers;
-import miniweb.http.body;
+import ninox.web.http.httpversion;
+import ninox.web.http.client;
+import ninox.web.http.headers;
+import ninox.web.http.body;
 
 /** 
  * The http code a response can have
@@ -164,7 +164,7 @@ unittest {
  * 
  * Returns: the string representation or `null` if the method is $(REF HttpResponseCode.custom).
  * 
- * See_Also: $(REF miniweb.http.Response.respCode)
+ * See_Also: $(REF ninox.web.http.Response.respCode)
  */
 string httpResponseCodeToString(HttpResponseCode code) {
 	import std.traits : EnumMembers;

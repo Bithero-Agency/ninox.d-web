@@ -23,7 +23,7 @@
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module miniweb.http.method;
+module ninox.web.http.method;
 
 /** 
  * The http method a request can have
