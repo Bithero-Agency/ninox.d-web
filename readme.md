@@ -130,14 +130,14 @@ import ninox.web.serialization;
 class JsonMapperImpl {
     // the deserialize function; responsible to deserialize any buffer of data into an instance of T
     static T deserialize(T)(void[] buffer) {
-        import serialize_d.json.serializer;
+        import ninox.data.json.serializer;
         auto mapper = new JsonMapper();
         return mapper.deserialize!(T)( cast(string) buffer );
     }
 
     // the serialize function; responsible to serialize any given value into a string
     static string serialize(T)(auto ref T value) {
-        import serialize_d.json.serializer;
+        import ninox.data.json.serializer;
         auto mapper = new JsonMapper();
         return mapper.serialize!T(value);
     }
@@ -153,7 +153,7 @@ A package vital if you want to utilize the [serialize-d](https://code.dlang.org/
 
 To use it, simple import it and use any of the provided templates + mixin to generate the glue code:
 ```d
-import ninox.web.serialize_d;
+import ninox.web.integration.ninox.data;
 mixin(mkJsonMapper!());
 
 mixin NinoxWebMain!(test);

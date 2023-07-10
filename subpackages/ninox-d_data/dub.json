@@ -7,9 +7,9 @@
 		"ninox-d_web": {
 			"path": ".."
 		},
-		"serialize-d": "~>1.0.0"
+		"ninox-d_data": "~>1.0.0"
 	},
-	"description": "Integration of the serialize-d package into ninox.d-web",
+	"description": "Integration of the ninox.d-data package into ninox.d-web",
 	"license": "AGPL-3.0-or-later",
-	"name": "serialize-d"
+	"name": "ninox-d_data"
 }

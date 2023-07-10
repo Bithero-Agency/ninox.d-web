@@ -16,6 +16,6 @@
 	"subPackages": [
 		"./test",
 		"./subpackages/http",
-		"./subpackages/serialize_d"
+		"./subpackages/ninox-d_data"
 	]
 }

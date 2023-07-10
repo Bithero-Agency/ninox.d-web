@@ -9,9 +9,9 @@
         "ninox-d_web": {
             "path": ".."
         },
-        "serialize-d:json": "~>1.0.0",
-        "ninox-d_web:serialize-d": {
-            "path": "../subpackages/serialize_d"
+        "ninox-d_data:json": "~>1.0.0",
+        "ninox-d_web:ninox-d_data": {
+            "path": "../subpackages/ninox-d_data"
         }
     }
 }

@@ -6,8 +6,8 @@ import ninox.web.serialization;
 import std.stdio;
 import std.json;
 
-//import ninox.web.serialize_d;
-//mixin(mkJsonMapper!());
+import ninox.web.integration.ninox.data;
+mixin(mkJsonMapper!());
 
 mixin NinoxWebMain!(test);
 

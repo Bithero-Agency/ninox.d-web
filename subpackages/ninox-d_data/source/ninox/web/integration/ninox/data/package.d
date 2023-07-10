@@ -16,27 +16,27 @@
  */
 
 /** 
- * Module to integrate serialize-d into ninox.d-web
+ * Module to integrate ninox.d-data into ninox.d-web
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
  * Copyright: Copyright (C) 2023 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module ninox.web.serialize_d;
+module ninox.web.integration.ninox.data;
 
 template mkJsonMapper() {
-    static if (__traits(compiles, imported!"serialize_d.json.serializer".JsonMapper)) {
+    static if (__traits(compiles, imported!"ninox.data.json.serializer".JsonMapper)) {
         enum mkJsonMapper = "
             @( imported!\"ninox.web.serialization\".Mapper([\"application/json\"]) )
             class JsonMapperImpl {
                 static T deserialize(T)(void[] buffer) {
-                    import serialize_d.json.serializer;
+                    import ninox.data.json.serializer;
                     auto mapper = new JsonMapper();
                     return mapper.deserialize!(T)( cast(string) buffer );
                 }
                 static string serialize(T)(auto ref T value) {
-                    import serialize_d.json.serializer;
+                    import ninox.data.json.serializer;
                     auto mapper = new JsonMapper();
                     return mapper.serialize!T(value);
                 }
@@ -44,6 +44,6 @@ template mkJsonMapper() {
         ";
     }
     else {
-        static assert (0, "Cannot use mkJsonMapper without also installing the serialize-d:json package!");
+        static assert (0, "Cannot use mkJsonMapper without also installing the ninox-d_data:json package!");
     }
 }
