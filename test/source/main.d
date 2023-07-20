@@ -108,3 +108,15 @@ MyValue testJson2(@Header string accept) {
 void testJson3(MyValue val) {
     writeln("Handle testJson3; i=", val.i);
 }
+
+@Host("some.special.domain.tld") {
+
+    @Get @Route("/testSpecial")
+    Response get_testSpecial() {
+        auto resp = Response.build_200_OK();
+        resp.headers.set("Bla", "blup");
+        resp.setBody("This is a special test :3");
+        return resp;
+    }
+
+}
