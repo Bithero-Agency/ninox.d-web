@@ -158,6 +158,27 @@ struct Consumes {
     string type;
 }
 
+/** 
+ * UDA to specify if the route should only be available on certain hosts;
+ * uses the "Host" header to determine the host
+ */
+struct RequireHost {
+    string pattern;
+
+    this() @disable;
+
+    this(string pattern) {
+        this.pattern = pattern;
+    }
+
+    private HostMatcher toMatcher() {
+        return new HostMatcher(this.pattern);
+    }
+}
+
+/// ditto
+alias Host = RequireHost;
+
 // ================================================================================
 
 /// Checks a condition if the request can be handled
@@ -455,6 +476,26 @@ private class ContentTypeMatcher : BaseMimeMatcher {
 
         // TODO: make a error code
         return false;
+    }
+}
+
+/// Checks if the request is for a specific host
+private class HostMatcher : Matcher {
+    private Regex!char pattern;
+
+    this(string pattern) {
+        this.pattern = regex(pattern);
+    }
+
+    bool matches(NinoxWebRequest req, ref RoutingStore store) {
+        if (!req.http.headers.has("Host")) {
+            return false;
+        }
+
+        auto host = req.http.headers.getOne("Host");
+
+        import std.regex : matchFirst;
+        return cast(bool) matchFirst(host, this.pattern);
     }
 }
 
@@ -890,6 +931,13 @@ private void addRoute(alias fn, string args, Modules...)(Router r, DList!Middlew
     }
 
     Matcher[] matchers;
+    static if (hasUDA!(fn, RequireHost)) {
+        static foreach (uda; getUDAs!(fn, RequireHost)) {
+            pragma(msg, "   - ", uda);
+            matchers ~= uda.toMatcher();
+        }
+    }
+
     static if (hasUDA!(fn, Route)) {
         static foreach (uda; getUDAs!(fn, Route)) {
             pragma(msg, "   - ", uda);
