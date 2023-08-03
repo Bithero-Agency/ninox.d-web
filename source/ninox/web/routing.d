@@ -1001,6 +1001,7 @@ private void addRoute(alias fn, string args, Modules...)(Router r, DList!Middlew
 
     r.addRoute(matchers, middlewares, (NinoxWebRequest req) {
         import std.json : JSONValue;
+        import std.traits : isSomeString;
 
         alias retTy = ReturnType!fn;
         static if (is(retTy == void)) {
@@ -1013,6 +1014,13 @@ private void addRoute(alias fn, string args, Modules...)(Router r, DList!Middlew
                 "import ninox.web.http.body;" ~
                 "auto resp = new Response(HttpResponseCode.OK_200);" ~
                 "resp.responseBody = new StdJsonBody( fn(" ~ args ~ ") );" ~
+                "return resp;"
+            );
+        } else static if (isSomeString!retTy) {
+            mixin(
+                "import ninox.web.http.response;" ~
+                "auto resp = new Response(HttpResponseCode.OK_200);" ~
+                "resp.setBody( fn(" ~ args ~ ") );" ~
                 "return resp;"
             );
         } else static if (hasMember!(retTy, "toResponse")) {

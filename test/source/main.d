@@ -109,6 +109,11 @@ void testJson3(MyValue val) {
     writeln("Handle testJson3; i=", val.i);
 }
 
+@Get @Route("/testString")
+string testString() {
+    return "Hello world from a string :D\n";
+}
+
 @Host("some.special.domain.tld") {
 
     @Get @Route("/testSpecial")
