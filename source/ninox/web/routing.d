@@ -1128,6 +1128,33 @@ private void addRoute(alias fn, string args, Modules...)(Router r, DList!Middlew
     });
 }
 
+private void addPublicDirMapping(Router r, PublicDirMapping pubDir) {
+    Matcher[] matchers = [
+        new RouteMatcher(pubDir.uri_path ~ "/:file"),
+        cast(Matcher) new MethodMatcher(Method(HttpMethod.GET)),
+    ];
+    DList!Middleware emptyList;
+    r.addRoute(matchers, emptyList, (NinoxWebRequest req) {
+        import ninox.fs : NinoxFsNotFoundException;
+        auto file = req.pathParams["file"];
+        try {
+            auto resp = Response.build_200_OK();
+            // TODO: add libmagic to auto-detect content types, and maybe cache them somehow
+            resp.setBody( cast(string) pubDir.fs.readFile(file) );
+            return Outcome.from( resp );
+        }
+        catch (NinoxFsNotFoundException e) {
+            if (pubDir.exclusive) {
+                // exclusive means that we return a 404 on non-found files
+                return Outcome.from( new Response(HttpResponseCode.Not_Found_404) );
+            } else {
+                // continue normal routeing
+                return Outcome.nextHandler();
+            }
+        }
+    });
+}
+
 /**
  * Initializes a router instance.
  * 
@@ -1198,6 +1225,10 @@ Router initRouter(Modules...)(ServerConfig conf) {
             addRoute!(fn, args, Modules)(r, middlewares);
 
         }
+    }
+
+    foreach (pubDir; conf.publicdir_mappings) {
+        addPublicDirMapping(r, pubDir);
     }
 
     r.sortRoutes();

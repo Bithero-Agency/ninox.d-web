@@ -21,11 +21,18 @@ MaybeResponse myfun() {
 void my_server_conf(ServerConfig conf) {
     writeln("Called on server start!");
     conf.setCustomServerInfo("My Fancy Server");
+
+    conf.addPublicDir("./public", "/assets1");
 }
 
 @OnServerShutdown
 void my_server_shutdown() {
     writeln("Called on server shutdown!");
+}
+
+@Route("/assets1/test2.txt")
+string assets1_test2_txt() {
+    return "This is a dynamic 'file'!";
 }
 
 @Route("/doOther")

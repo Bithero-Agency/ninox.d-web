@@ -8,7 +8,8 @@
 		"ninox-d_async": "~>1.0.0",
 		"ninox-d_web:http": {
 			"path": "./subpackages/http"
-		}
+		},
+		"ninox-d_fs": "~>1.0.2"
 	},
 	"description": "A minimal yet complete web framework",
 	"license": "AGPL-3.0-or-later",

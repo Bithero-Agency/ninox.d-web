@@ -26,6 +26,7 @@
 module ninox.web.config;
 
 import std.socket;
+import ninox.fs;
 
 /** 
  * UDA for functions that should be called on server start
@@ -62,6 +63,13 @@ enum ServerInfo {
 	CUSTOM,
 }
 
+/// A public directory mapping
+struct PublicDirMapping {
+	FS fs;
+	string uri_path;
+	bool exclusive = false;
+}
+
 /** 
  * Configuration of the server
  */
@@ -88,6 +96,9 @@ class ServerConfig {
 	/// Returns a 404 instead of a 406 when no route handler was found because the @Produces restriction didn't permitted handling
 	bool treat_406_as_404 = false;
 
+	/// List of all public dir mappings
+	PublicDirMapping[] publicdir_mappings;
+
 	this() {
 		this.addr = new InternetAddress("localhost", 8080);
 	}
@@ -96,5 +107,31 @@ class ServerConfig {
 	void setCustomServerInfo(string info) {
 		customServerInfo = info;
 		publishServerInfo = ServerInfo.CUSTOM;
+	}
+
+	/**
+	 * Adds an public directory mapping via runtime lookup
+	 * 
+	 * Params:
+	 *   fs_path = the path to the directory on the filesystem, relative to the current working directory of the process
+	 *   uri_path = path for the uri to match the mapping
+	 *   exclusive = if true, this means when a file could not be found, routing is stoped with an 404;
+	 *               otherwise when its false, it falls through to normal routing on nonexisting files
+	 */
+	void addPublicDir(string fs_path, string uri_path = "/", bool exclusive = false) {
+		this.addPublicDir(getOsFs(fs_path), uri_path, exclusive);
+	}
+
+	/**
+	 * Adds an public directory mapping via the ninox.d-fs filesystem abstraction
+	 * 
+	 * Params:
+	 *   fs = the filesystem to use
+	 *   uri_path = path for the uri to match the mapping
+	 *   exclusive = if true, this means when a file could not be found, routing is stoped with an 404;
+	 *               otherwise when its false, it falls through to normal routing on nonexisting files
+	 */
+	void addPublicDir(FS fs, string uri_path = "/", bool exclusive = false) {
+		this.publicdir_mappings ~= PublicDirMapping( fs, uri_path, exclusive );
 	}
 }
