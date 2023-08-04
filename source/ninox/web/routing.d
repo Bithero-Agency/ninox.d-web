@@ -499,6 +499,56 @@ private class HostMatcher : Matcher {
     }
 }
 
+// ================================================================================
+
+struct Outcome {
+    this(Response r) {
+        this._kind = Kind.RESPONSE;
+        this._response = r;
+    }
+
+    this(MaybeResponse r) {
+        if (r.isSome()) {
+            this._kind = Kind.RESPONSE;
+            this._response = r.take();
+        } else {
+            this._kind = Kind.NO_RESPONSE;
+        }
+    }
+
+    static Outcome from(Response r) {
+        return Outcome(r);
+    }
+
+    static Outcome from(MaybeResponse r) {
+        return Outcome(r);
+    }
+
+    static Outcome nextHandler() {
+        auto o = Outcome();
+        o._kind = Kind.TRY_NEXT_HANDLER;
+        return o;
+    }
+
+    @property Kind kind() {
+        return this._kind;
+    }
+
+    @property Response response() {
+        if (this._kind == Kind.RESPONSE) {
+            return this._response;
+        }
+        throw new Exception("Outcome was no response, cant request response form it then");
+    }
+
+private:
+    enum Kind {
+        INVALID, RESPONSE, NO_RESPONSE, TRY_NEXT_HANDLER
+    }
+    Kind _kind = Kind.INVALID;
+    Response _response = null;
+}
+
 /// Container to store delegates / functions which are route handlers with the returntype `T`.
 private struct Callable(T) {
     void set(T function(NinoxWebRequest req) fn) pure nothrow @nogc @safe {
@@ -528,16 +578,19 @@ private:
 
 /// Container for route handlers
 private struct Handler {
-    Response opCall(NinoxWebRequest req) {
+    Outcome opCall(NinoxWebRequest req) {
         final switch (kind) {
             case Kind.NONE:
                 throw new Exception("Tried to call unintialized handler!");
             case Kind.VOID: {
                 this.cbVoid(req);
-                return Response.build_200_OK(); // TODO: build an actual correct response!
+                return Outcome.from(Response.build_200_OK()); // TODO: build an actual correct response!
             }
             case Kind.RESPONSE: {
-                return this.cbResponse(req);
+                return Outcome.from(this.cbResponse(req));
+            }
+            case Kind.OUTCOME: {
+                return this.cbOutcome(req);
             }
         }
     }
@@ -554,13 +607,20 @@ private struct Handler {
         h.cbResponse = cb;
         return h;
     }
+    static Handler from(Callable!Outcome cb) {
+        Handler h;
+        h.kind = Kind.OUTCOME;
+        h.cbOutcome = cb;
+        return h;
+    }
 
 private:
-    enum Kind{ NONE, VOID, RESPONSE }
+    enum Kind{ NONE, VOID, RESPONSE, OUTCOME }
     Kind kind = Kind.NONE;
     union {
         Callable!void cbVoid;
         Callable!Response cbResponse;
+        Callable!Outcome cbOutcome;
     }
 }
 
@@ -632,7 +692,23 @@ class Router {
                     }
                 }
 
-                return ent.handler(req);
+                auto outcome = ent.handler(req);
+                final switch (outcome.kind) {
+                    case Outcome.Kind.INVALID: {
+                        throw new Exception("Got invalid outcome from handler!");
+                    }
+                    case Outcome.Kind.RESPONSE: {
+                        return outcome.response;
+                    }
+                    case Outcome.Kind.NO_RESPONSE: {
+                        return null;
+                    }
+                    case Outcome.Kind.TRY_NEXT_HANDLER: {
+                        // Try next handler.
+                        // TODO: consider how we wanna react to middlewares modifing the request here...
+                        continue;
+                    }
+                }
             } else {
 
             }
