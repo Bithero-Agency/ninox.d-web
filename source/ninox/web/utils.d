@@ -196,29 +196,47 @@ unittest {
 template BuildImportCodeForType(alias T) {
     import std.traits;
 
-    enum FullType = fullyQualifiedName!T;
-    enum Mod = moduleName!T;
-    auto delMod(Range)(Range inp, Range mod) {
-        import std.traits : isDynamicArray;
-        import std.range.primitives : ElementEncodingType;
-        static import std.ascii;
-        static import std.uni;
-
-        size_t i = 0;
-        for (const size_t end = mod.length; i < end; ++i) {
-            if (inp[i] != mod[i]) {
-                break;
-            }
-        }
-        inp = inp[i .. $];
-        return inp;
+    static if (isArray!T) {
+        alias VTy(V : V[]) = V;
+        enum BuildImportCodeForType = BuildImportCodeForType!(VTy!T) ~ "[]";
     }
-    enum Name = delMod(FullType, Mod);
+    else static if (isAssociativeArray!T) {
+        enum BuildImportCodeForType = BuildImportCodeForType!(ValueType!T) ~ "[" ~ BuildImportCodeForType!(KeyType!T) ~ "]";
+    }
+    else static if (isBasicType!T) {
+        enum BuildImportCodeForType = T.stringof;
+    }
+    else static if (isSomeString!T) {
+        enum BuildImportCodeForType = T.stringof;
+    }
+    else {
+        enum FullType = fullyQualifiedName!T;
+        enum Mod = moduleName!T;
+        auto delMod(Range)(Range inp, Range mod) {
+            import std.traits : isDynamicArray;
+            import std.range.primitives : ElementEncodingType;
+            static import std.ascii;
+            static import std.uni;
 
-    enum BuildImportCodeForType = "imported!\"" ~ Mod ~ "\"" ~ Name;
+            size_t i = 0;
+            for (const size_t end = mod.length; i < end; ++i) {
+                if (inp[i] != mod[i]) {
+                    break;
+                }
+            }
+            inp = inp[i .. $];
+            return inp;
+        }
+        enum Name = delMod(FullType, Mod);
+
+        enum BuildImportCodeForType = "imported!\"" ~ Mod ~ "\"" ~ Name;
+    }
 }
 
 unittest {
     import ninox.web.serialization : Mapper;
     static assert (BuildImportCodeForType!Mapper == "imported!\"ninox.web.serialization\".Mapper");
+    static assert (BuildImportCodeForType!(Mapper[int]) == "imported!\"ninox.web.serialization\".Mapper[int]");
+    static assert (BuildImportCodeForType!(Mapper[string]) == "imported!\"ninox.web.serialization\".Mapper[immutable(char)[]]");
+    static assert (BuildImportCodeForType!(Mapper[]) == "imported!\"ninox.web.serialization\".Mapper[]");
 }
