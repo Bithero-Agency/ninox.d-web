@@ -112,6 +112,29 @@ CustomValue getCustomValue(@PathParam string val) {
 }
 ```
 
+## Public directories / static files
+
+To add a public dir mapping, just use the server configuration hook and add all public dir mappings to it:
+
+```d
+@OnServerStart
+void my_server_conf(ServerConfig conf) {
+    // ... other config code ...
+
+    // Maps every request that starts with "/assets" to the folder "$PWD/public".
+    // Allows for fallthrough; means when a file could not be found,
+    // it dosnt returns 404 but rather tries continue finding another route that might match.
+    conf.addPublicDir("./public", "/assets");
+
+    // Maps every request that starts with "/static" to the ninox.d-fs filesystem "staticFs".
+    // Requests are handled exclusive, meaning any file that could not be found,
+    // is immediately responded to with a 404.
+    conf.addPublicDir( staticFs, "/static", true);
+
+    // ...
+}
+```
+
 ## Serialization
 
 ninox.d-web supports serialization via three annotations:
