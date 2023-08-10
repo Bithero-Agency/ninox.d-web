@@ -174,11 +174,25 @@ string extractBaseMime(string inp) {
     string res = "";
 
     auto d1 = split(inp, "/");
+    if (d1.length < 1) {
+        return "";
+    }
     res ~= d1[0];
+    if (d1.length == 1) {
+        return res;
+    }
     res ~= '/';
 
     auto d2 = split(d1[1], "+");
-    res ~= d2[$-1];
+    if (d2.length < 1) {
+        return res;
+    }
+    else if (d2.length == 1) {
+        res ~= d2[0];
+    }
+    else {
+        res ~= d2[$-1];
+    }
 
     return res;
 }
