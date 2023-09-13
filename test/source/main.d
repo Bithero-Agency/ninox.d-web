@@ -9,6 +9,30 @@ import std.json;
 import ninox.web.integration.ninox.data;
 mixin(mkJsonMapper!());
 
+@( imported!"ninox.web.serialization".Mapper([ "text/x-meow" ]) )
+class MeowMapperImpl {
+    static T deserialize(T)(void[] buffer) {
+        static if (is(T == MyValue)) {
+            import std.conv : to;
+            auto v = new MyValue();
+            v.i = to!int(to!string(buffer));
+            return v;
+        } else {
+            import std.traits : fullyQualifiedName;
+            throw new RuntimeException("Cannot deserialize type " ~ fullyQualifiedName!T);
+        }
+    }
+    static string serialize(T)(auto ref T value) {
+        static if (is(T == MyValue)) {
+            import std.conv : to;
+            return to!string(value.i);
+        } else {
+            import std.traits : fullyQualifiedName;
+            throw new RuntimeException("Cannot serialize type " ~ fullyQualifiedName!T);
+        }
+    }
+}
+
 mixin NinoxWebMain!(test);
 
 @RegisterMiddleware("a")
@@ -104,14 +128,14 @@ class MyValue {
 }
 
 @GET @Route("/testJson2")
-@Produces("application/json")
+@Produces(["application/json", "text/x-meow"])
 MyValue testJson2(@Header string accept) {
     writeln("Accept: ", parseHeaderQualityList(accept));
     return new MyValue();
 }
 
 @Post @Route("/testJson3")
-@Consumes("application/json")
+@Consumes(["application/json", "text/x-meow"])
 void testJson3(MyValue val) {
     writeln("Handle testJson3; i=", val.i);
 }
