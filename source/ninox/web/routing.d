@@ -163,7 +163,15 @@ struct Produces {
  * also used to restrict a handler to various types of input via the "Content-Type" header
  */
 struct Consumes {
-    string type;
+    string[] types;
+
+    this(string type) {
+        this.types = [type];
+    }
+
+    this(string[] types) {
+        this.types = types;
+    }
 }
 
 /** 
@@ -1091,8 +1099,24 @@ private void addRoute(alias fn, string args, Modules...)(Router r, DList!Middlew
                 static if (is(c_udas[i] == Consumes)) {
                     static assert (0, "Need instance of `@Consumes` on handler `" ~ fullyQualifiedName!fn ~ "`");
                 } else {
-                    static assert (c_udas[i].type != "", "@Consumes needs a mime type on handler `" ~ fullyQualifiedName!fn ~ "`");
-                    enum CollectConsumesAttrs = "\"" ~ c_udas[i].type ~ "\", " ~ CollectConsumesAttrs!(i+1);
+                    static assert (c_udas[i].types.length != 0, "@Consumes needs a mime type on handler `" ~ fullyQualifiedName!fn ~ "`");
+
+                    template ExpandConsumeAttr(size_t j = 0) {
+                        static if (j >= c_udas[i].types.length) {
+                            enum ExpandConsumeAttr = "";
+                        } else {
+                            import std.conv : to;
+                            static assert (c_udas[i].types[j] != "", "@Consumes needs a non-empty mime type at position " ~ to!string(j) ~ " on handler `" ~ fullyQualifiedName!fn ~ "`");
+                            enum ExpandConsumeAttr = "\"" ~ c_udas[i].types[j] ~ "\", " ~ ExpandConsumeAttr!(j+1);
+                        }
+                    }
+
+                    enum products = ExpandConsumeAttr!();
+                    static if (products == "") {
+                        enum CollectConsumesAttrs = CollectConsumesAttrs!(i+1);
+                    } else {
+                        enum CollectConsumesAttrs = products ~ CollectConsumesAttrs!(i+1);
+                    }
                 }
             }
         }
