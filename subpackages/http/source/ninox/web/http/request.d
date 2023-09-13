@@ -210,5 +210,9 @@ Request parseRequest(HttpClient client) {
 		r._body.buffer = client.read(contentLength);
 	}
 
+	if (r.ver == HttpVersion.HTTP1_1 && !r._headers.has("Host")) {
+		throw new RequestParsingException("request specified HTTP 1.1 but supplied no Host header");
+	}
+
 	return r;
 }
