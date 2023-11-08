@@ -100,8 +100,16 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 			import std.string : toLower;
 			auto conn = req.headers.getOne("Connection", "close").toLower();
 			if (conn == "keep-alive") {}
-			else if (conn == "close") { break; }
-			else if (conn == "upgrade") { break; }
+			else if (conn == "close") { return; }
+			else if (conn == "upgrade") {
+				// TODO: handle upgrade...
+				return;
+			}
+
+			if (!client.waitForActivity(conf.keep_alive_timeout)) {
+				// timeout reached without any activity
+				return;
+			}
 
 			req = parseRequest(client);
 			handleRequest(client, router, conf, req);

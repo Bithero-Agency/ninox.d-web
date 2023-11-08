@@ -26,6 +26,7 @@
 module ninox.web.config;
 
 import std.socket;
+import std.datetime : Duration, dur;
 import ninox.fs;
 
 /** 
@@ -98,6 +99,9 @@ class ServerConfig {
 
 	/// List of all public dir mappings
 	PublicDirMapping[] publicdir_mappings;
+
+	/// Timeout for keep-alive connections; defaults to 300 seconds / 5 minutes
+	Duration keep_alive_timeout = dur!"seconds"(300);
 
 	this() {
 		this.addr = new InternetAddress("localhost", 8080);

@@ -27,6 +27,7 @@ module ninox.web.client;
 
 import ninox.async.io.socket;
 import std.variant;
+import std.datetime : Duration;
 import ninox.web.http.client;
 import ninox.web.http.request;
 
@@ -47,6 +48,10 @@ class NinoxWebHttpClient : BaseHttpClient {
 	/// Get the underlaying socket
 	AsyncSocket getSocket() {
 		return this.sock;
+	}
+
+	bool waitForActivity(ref Duration timeout) {
+		return this.sock.waitForActivity(timeout).await();
 	}
 
 	protected override size_t nativeRead(scope void[] buffer) {
