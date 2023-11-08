@@ -30,9 +30,9 @@ import ninox.web.config;
 import ninox.web.utils;
 import ninox.web.middlewares;
 import ninox.web.client : NinoxWebRequest;
-import ninox.async.utils : Option;
+import ninox.std.optional : Optional;
 
-alias MaybeResponse = Option!Response;
+alias MaybeResponse = Optional!Response;
 
 import std.container : DList;
 import std.regex : Regex, regex;
@@ -1236,14 +1236,14 @@ Router initRouter(Modules...)(ServerConfig conf) {
                         return MaybeResponse.none();
                     });
                 }
-                static if (is(ReturnType!fn == Option!Response)) {
+                static if (is(ReturnType!fn == Optional!Response)) {
                     pragma(msg, "Creating middleware handler on `" ~ fullyQualifiedName!fn ~ "` named '" ~ uda.name ~ "', calling with: `" ~ args ~ "`");
                     r.addMiddleware(uda.name, (NinoxWebRequest req) {
                         mixin( "return fn(" ~ args ~ ");" );
                     });
                 }
                 else {
-                    static assert(0, "`" ~ fullyQualifiedName!fn ~ "` needs to have either void or Option!Response as returntype");
+                    static assert(0, "`" ~ fullyQualifiedName!fn ~ "` needs to have either void or Optional!Response as returntype");
                 }
             }
         }

@@ -56,7 +56,7 @@ To use middlewares you have two options, either create a named one or use functi
 ```d
 @RegisterMiddleware("my_middleware")    // registers a named middleware
 MaybeResponse handler(Request req) {
-    return MaybeResponse.none();    // returns a Option!Response with no value set,
+    return MaybeResponse.none();    // returns a Optional!Response with no value set,
                                     // which effectivly means to call either the next middleware
                                     // or the handler.
 }
