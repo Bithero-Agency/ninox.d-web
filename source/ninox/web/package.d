@@ -85,6 +85,8 @@ private void handleRequest(NinoxWebHttpClient client, Router router, ServerConfi
  *   conf = the server config
  */
 private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
+	auto peerAddr = sock.remoteAddress();
+
 	try {
 		auto client = new NinoxWebHttpClient(sock);
 
@@ -117,7 +119,7 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 
 	} catch (Throwable th) {
 		import std.stdio;
-		writeln("[handleClient - ", sock.remoteAddress(), "] error while handling request: ", th);
+		writeln("[handleClient - ", peerAddr, "] error while handling request: ", th);
 	}
 }
 
