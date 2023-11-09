@@ -90,6 +90,11 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 	try {
 		auto client = new NinoxWebHttpClient(sock);
 
+		if (!client.waitForActivity(conf.keep_alive_timeout)) {
+			// timeout reached without any activity
+			return;
+		}
+
 		Request req = parseRequest(client);
 		handleRequest(client, router, conf, req);
 
