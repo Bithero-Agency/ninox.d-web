@@ -7,7 +7,7 @@
 		"ninox-d_web": {
 			"path": ".."
 		},
-		"ninox-d_data": "~>1.0.0"
+		"ninox-d_data": "~>1.1.0"
 	},
 	"description": "Integration of the ninox.d-data package into ninox.d-web",
 	"license": "AGPL-3.0-or-later",
