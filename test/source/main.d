@@ -47,6 +47,9 @@ void my_server_conf(ServerConfig conf) {
     conf.setCustomServerInfo("My Fancy Server");
 
     conf.addPublicDir("./public", "/assets1");
+
+    import std.datetime : dur;
+    conf.keep_alive_timeout = dur!"seconds"(10);
 }
 
 @OnServerShutdown
