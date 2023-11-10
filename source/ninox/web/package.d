@@ -98,7 +98,7 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 		Request req = parseRequest(client);
 		handleRequest(client, router, conf, req);
 
-		if (req.httpVersion != HttpVersion.HTTP1_1) {
+		if (req.httpVersion < HttpVersion.HTTP1_1) {
 			// close connection immedeatly after first request if not HTTP 1.1
 			return;
 		}
