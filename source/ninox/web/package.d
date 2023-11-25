@@ -128,6 +128,14 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 	}
 }
 
+private void handleClientAsync(AsyncSocket client, Router r, ServerConfig conf) {
+	gscheduler.schedule(() {
+		handleClient(client, r, conf);
+		client.shutdownSync(SocketShutdown.BOTH);
+		client.closeSync();
+	});
+}
+
 /** 
  * Mainloop of ninox.d-web; listens for connections and dispatches them
  * 
@@ -149,13 +157,7 @@ int ninoxwebRunServer(ServerConfig conf, Router r) {
 			import std.stdio;
 			writeln("[ninoxwebRunServer] accepting client ", client.remoteAddress());
 		}
-
-		// TODO: setKeepAlive()
-		gscheduler.schedule(() {
-			handleClient(client, r, conf);
-			client.shutdownSync(SocketShutdown.BOTH);
-			client.closeSync();
-		});
+		handleClientAsync(client, r, conf);
 	}
 
 	return 0;
