@@ -5,7 +5,7 @@
 	],
 	"copyright": "Copyright © 2023, Mai-Lapyst",
 	"dependencies": {
-		"ninox-d_async": "~>1.1.1",
+		"ninox-d_async": "~>1.1.2",
 		"ninox-d_web:http": {
 			"path": "./subpackages/http"
 		},
