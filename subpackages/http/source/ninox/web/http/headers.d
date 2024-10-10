@@ -161,4 +161,38 @@ class HeaderBag {
 			fn(key, value);
 		}
 	}
+
+	pragma(inline) ref auto opIndex(string key) {
+		return this.get(key);
+	}
+
+	pragma(inline) ref auto opIndexAssign(string value, string key) {
+		return this.set(key, value);
+	}
+
+	pragma(inline) ref auto opIndexAssign(string[] value, string key) {
+		return this.set(key, value);
+	}
+
+	int opApply(scope int delegate(string, ref string) dg) {
+		int result = 0;
+		foreach (key, ref vals; this.map) {
+			foreach (ref val; vals) {
+				result = dg(key, val);
+				if (result)
+					break;
+			}
+		}
+		return result;
+	}
+
+	int opApply(scope int delegate(string, ref string[]) dg) {
+		int result = 0;
+		foreach (key, ref vals; this.map) {
+			result = dg(key, vals);
+			if (result)
+				break;
+		}
+		return result;
+	}
 }
