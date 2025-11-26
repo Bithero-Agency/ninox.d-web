@@ -181,15 +181,16 @@ Request parseRequest(HttpClient client) {
 						return false;
 					}
 					if (line[j] == ' ') {
-						key ~= line[0 .. i];
-						value ~= line[i+2 .. $];
+						key = line[0 .. i];
+						value = line[i+2 .. $];
+						return true;
 					}
 				}
 			}
 			return false;
 		}
 
-		if (splitHeader()) {
+		if (!splitHeader()) {
 			throw new RequestParsingException("header line has wrong format");
 		}
 
