@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Mai-Lapyst
+ * Copyright (C) 2023-2025 Mai-Lapyst
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,13 +19,39 @@
  * Module to hold header related code
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
- * Copyright: Copyright (C) 2023 Mai-Lapyst
+ * Copyright: Copyright (C) 2023-2025 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
 module ninox.web.http.headers;
 
-import std.string : toLower;
+private pragma(inline) char toLower(char c) @nogc @safe pure nothrow {
+	return (c >= 'A' && c <= 'Z') ? cast(char)(c + 32) : c;
+}
+
+private struct CaseInsensitiveString {
+	string data;
+
+	size_t toHash() const @nogc @safe pure nothrow {
+		size_t hash = 0;
+		foreach (char c; this.data) {
+			hash = hash * 32 + c.toLower;
+		}
+		return hash;
+	}
+
+	bool opEquals(const CaseInsensitiveString other) const @nogc @safe pure nothrow {
+		if (this.data.length != other.data.length) return false;
+		foreach (i, char c; this.data) {
+			if (c.toLower != other.data[i].toLower) return false;
+		}
+		return true;
+	}
+
+	pragma(inline) string opCast() const @nogc @safe pure nothrow {
+		return this.data;
+	}
+}
 
 /**
  * Stores headers for an HTTP Message, all keys are case insensitive.
@@ -34,7 +60,7 @@ import std.string : toLower;
  */
 class HeaderBag {
 	/// internal assocative array storing the headers
-	private string[][string] map;
+	private string[][CaseInsensitiveString] map;
 
 	/**
 	 * Checks if a key is set
@@ -45,7 +71,7 @@ class HeaderBag {
 	 * Returns: true if the key is set, false otherwise
 	 */
 	bool has(string key) {
-		auto p = key.toLower() in map;
+		auto p = CaseInsensitiveString(key) in map;
 		return p !is null;
 	}
 
@@ -59,7 +85,7 @@ class HeaderBag {
 	 * Returns: the values for the key or a array with `defaultValue` as single element if no values are present.
 	 */
 	string[] get(string key, string defaultValue = "") {
-		auto p = key.toLower() in map;
+		auto p = CaseInsensitiveString(key) in map;
 		if (p !is null) {
 			return *p;
 		}
@@ -87,7 +113,7 @@ class HeaderBag {
 	 *   values = the values to set
 	 */
 	void set(string key, string[] values) {
-		map[key.toLower()] = values;
+		map[CaseInsensitiveString(key)] = values;
 	}
 
 	/** 
@@ -98,7 +124,7 @@ class HeaderBag {
 	 *   value = the value to set
 	 */
 	void set(string key, string value) {
-		map[key.toLower()] = [ value ];
+		map[CaseInsensitiveString(key)] = [ value ];
 	}
 
 	/** 
@@ -109,11 +135,11 @@ class HeaderBag {
 	 *   values = the values to append
 	 */
 	void append(string key, string[] values) {
-		key = key.toLower();
-		if (!has(key)) {
-			map[key] = values;
+		auto _key = CaseInsensitiveString(key);
+		if ((_key in map) !is null) {
+			map[_key] = values;
 		} else {
-			map[key] ~= values;
+			map[_key] ~= values;
 		}
 	}
 
@@ -135,7 +161,7 @@ class HeaderBag {
 	 *   key = the key to unset
 	 */
 	void unset(string key) {
-		map.remove(key.toLower());
+		map.remove(CaseInsensitiveString(key));
 	}
 
 	/** 
@@ -146,7 +172,7 @@ class HeaderBag {
 	 */
 	void foreachHeader(void delegate(string, string[]) dg) {
 		foreach (key, value; map) {
-			dg(key, value);
+			dg(key.data, value);
 		}
 	}
 
@@ -158,7 +184,7 @@ class HeaderBag {
 	 */
 	void foreachHeader(void function(string, string[]) fn) {
 		foreach (key, value; map) {
-			fn(key, value);
+			fn(key.data, value);
 		}
 	}
 
@@ -178,7 +204,7 @@ class HeaderBag {
 		int result = 0;
 		foreach (key, ref vals; this.map) {
 			foreach (ref val; vals) {
-				result = dg(key, val);
+				result = dg(key.data, val);
 				if (result)
 					break;
 			}
@@ -189,7 +215,7 @@ class HeaderBag {
 	int opApply(scope int delegate(string, ref string[]) dg) {
 		int result = 0;
 		foreach (key, ref vals; this.map) {
-			result = dg(key, vals);
+			result = dg(key.data, vals);
 			if (result)
 				break;
 		}
