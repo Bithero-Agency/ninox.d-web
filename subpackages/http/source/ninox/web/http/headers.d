@@ -55,8 +55,6 @@ private struct CaseInsensitiveString {
 
 /**
  * Stores headers for an HTTP Message, all keys are case insensitive.
- * 
- * Note: all keys are automatically transformed into lowercase to ensure the case insensitivity.
  */
 class HeaderBag {
 	/// internal assocative array storing the headers
