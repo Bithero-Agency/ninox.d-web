@@ -47,7 +47,7 @@ Currently supported are:
 - `HttpMethod` get the requests HTTP method of the request
 - `@Header` annotated `string` or `string[]` params get the specified header;
     Uses the parameter name if none is supplied
-- `@QueryParam` annotated `string` or `string[]` params get the specified header;
+- `@QueryParam` annotated `string` or `string[]` params get the specified query param;
     Uses the parameter name as queryparam name if none is supplied, same with default value
 - `@PathParam` annotated `string` params get the specified path parameter;
     Uses the parameter name if none is supplied
@@ -85,7 +85,7 @@ Response someWhereOther() {
 Usage of path parameters:
 ```d
 // To use path parameters, just use the syntax :<a-zA-Z0-9_> inside the route matcher.
-// @Route declarations also now support the `?` specified which make the character before it optional.
+// @Route declarations also support the `?` specified which make the character before it optional.
 @GET @Route("/user/:username/?")
 Response getUser(@PathParam string username) {
     // ...
