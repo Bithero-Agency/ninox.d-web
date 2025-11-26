@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Mai-Lapyst
+ * Copyright (C) 2023-2025 Mai-Lapyst
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,7 +19,7 @@
  * Module for all routing things
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
- * Copyright: Copyright (C) 2023 Mai-Lapyst
+ * Copyright: Copyright (C) 2023-2025 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
@@ -1219,10 +1219,10 @@ Router initRouter(Modules...)(ServerConfig conf) {
 
     Router r = new Router();
 
-    foreach (mod; Modules) {
-        foreach (fn; getSymbolsByUDA!(mod, RegisterMiddleware)) {
+    static foreach (mod; Modules) {
+        static foreach (fn; getSymbolsByUDA!(mod, RegisterMiddleware)) {
             static assert(isFunction!fn, "`" ~ __traits(identifier, fn) ~ "` is annotated with @RegisterMiddleware but isn't a function");
-            foreach (uda; getUDAs!(fn, RegisterMiddleware)) {
+            static foreach (uda; getUDAs!(fn, RegisterMiddleware)) {
                 auto p = uda.name in r.middlewares;
                 if (p !is null) {
                     assert(0, "Cannot register `" ~ fullyQualifiedName!fn ~ "` as middleware `" ~ uda.name ~ "` since a same named middleware already exists");
@@ -1248,7 +1248,7 @@ Router initRouter(Modules...)(ServerConfig conf) {
             }
         }
 
-        foreach (fn; getSymbolsByUDA!(mod, Route)) {
+        static foreach (fn; getSymbolsByUDA!(mod, Route)) {
             static assert(isFunction!fn, "`" ~ __traits(identifier, fn) ~ "` is annotated with @Route but isn't a function");
 
             static assert(!hasUDA!(fn, Header), "`@Header` cannot be applied to a function directly: " ~ fullyQualifiedName!fn);
@@ -1259,8 +1259,8 @@ Router initRouter(Modules...)(ServerConfig conf) {
             enum args = MakeCallDispatcher!fn;
 
             DList!Middleware middlewares;
-            foreach (mw_uda; getUDAs!(fn, Middleware)) {
-                if (mw_uda.kind == Middleware.Kind.NAMED) {
+            static foreach (mw_uda; getUDAs!(fn, Middleware)) {
+                static if (mw_uda.kind == Middleware.Kind.NAMED) {
                     auto p = mw_uda.name in r.middlewares;
                     if (p is null) {
                         assert(0, "Cannot use middleware `" ~ mw_uda.name ~ "` on `" ~ fullyQualifiedName!fn ~ "` since no such middleware exists");
