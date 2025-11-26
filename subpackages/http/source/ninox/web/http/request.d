@@ -198,8 +198,7 @@ Request parseRequest(HttpClient client) {
 			writeln("[ninox.web.http.parseRequest] got header: key=", key, "|value=", value);
 		}
 
-		import std.string : toLower;
-		r._headers.append(key.toLower(), value);
+		r._headers.append(key, value);
 	}
 
 	// TODO: this needs to be made more secure...
