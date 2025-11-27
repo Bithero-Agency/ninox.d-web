@@ -162,6 +162,7 @@ Request parseRequest(HttpClient client) {
 	requestLine = requestLine[pos+1 .. $];
 
 	r.ver = httpVersionFromString(requestLine);
+	if (r.ver == HttpVersion.unknown) throw new RequestParsingException("invalid request http version");
 
 	// start header parsing
 	while (true) {

@@ -56,8 +56,7 @@ static this() {
  * Returns: the http version or $(REF HttpVersion.unknown) if the version string is not known.
  */
 HttpVersion httpVersionFromString(string str) {
-	import std.string : toUpper;
-	auto p = toUpper(str) in str_to_version;
+	auto p = str in str_to_version;
 	if (p !is null) return *p;
 	return HttpVersion.unknown;
 }

@@ -65,8 +65,7 @@ static this() {
  * Returns: the http method or $(REF HttpMethod.custom) if the version string is not known.
  */
 HttpMethod httpMethodFromString(string str) {
-	import std.string : toUpper;
-	auto p = toUpper(str) in str_to_method;
+	auto p = str in str_to_method;
 	if (p !is null) return *p;
 	return HttpMethod.custom;
 }
