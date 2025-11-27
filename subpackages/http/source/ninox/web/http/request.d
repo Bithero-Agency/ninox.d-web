@@ -139,27 +139,29 @@ class RequestParsingException : Exception {
  * Throws: RequestParsingException if the parsing failed
  */
 Request parseRequest(HttpClient client) {
-	import std.array : split;
+	import std.string : indexOf;
 
 	Request r = new Request(client);
 
 	// parse the request line
-	auto requestLine = client.readLine().split(" ");
-	if (requestLine.length != 3) {
-		throw new RequestParsingException("requestline has wrong format");
+	auto requestLine = client.readLine();
+	if (requestLine == "PRI * HTTP/2.0") {
+		// TODO: http2 handling.
+		throw new RequestParsingException("HTTP2 is NIY");
 	}
 
-	debug (ninoxweb_parseRequest) {
-		import std.stdio;
-		writeln("[ninox.web.http.parseRequest] requestLine: ", requestLine);
-	}
+	auto pos = requestLine.indexOf(' ');
+	if (pos <= 0) throw new RequestParsingException("invalid request method");
+	r._raw_method = requestLine[0 .. pos];
+	r._method = httpMethodFromString(r._raw_method);
+	requestLine = requestLine[pos+1 .. $];
 
-	r._method = httpMethodFromString(requestLine[0]);
-	r._raw_method = requestLine[0];
+	pos = requestLine.indexOf(' ');
+	if (pos <= 0) throw new RequestParsingException("invalid request path");
+	r._uri = new URI(requestLine[0 .. pos]);
+	requestLine = requestLine[pos+1 .. $];
 
-	r._uri = new URI(requestLine[1]);
-
-	r.ver = httpVersionFromString(requestLine[2]);
+	r.ver = httpVersionFromString(requestLine);
 
 	// start header parsing
 	while (true) {
