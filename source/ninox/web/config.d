@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Mai-Lapyst
+ * Copyright (C) 2023-2025 Mai-Lapyst
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,7 +19,7 @@
  * Module to hold ninox.d-web's configuration
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
- * Copyright: Copyright (C) 2023 Mai-Lapyst
+ * Copyright: Copyright (C) 2023-2025 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
@@ -102,6 +102,9 @@ class ServerConfig {
 
 	/// Timeout for keep-alive connections; defaults to 300 seconds / 5 minutes
 	Duration keep_alive_timeout = dur!"seconds"(300);
+
+	/// Backlog parameter for the +AsyncSocket.listen+ method
+	int listen_backlog = 2048;
 
 	this() {
 		this.addr = new InternetAddress("localhost", 8080);

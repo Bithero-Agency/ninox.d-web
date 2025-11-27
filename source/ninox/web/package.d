@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Mai-Lapyst
+ * Copyright (C) 2023-2025 Mai-Lapyst
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,7 +19,7 @@
  * Main module; also holds the main-loop and request handling code
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
- * Copyright: Copyright (C) 2023 Mai-Lapyst
+ * Copyright: Copyright (C) 2023-2025 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
@@ -148,7 +148,7 @@ private void handleClientAsync(AsyncSocket client, Router r, ServerConfig conf) 
 int ninoxwebRunServer(ServerConfig conf, Router r) {
 	auto listener = new AsyncSocket(AddressFamily.INET, SocketType.STREAM);
 	listener.bind(conf.addr);
-	listener.listen();
+	listener.listen(conf.listen_backlog);
 
 	bool isRunning = true;
 	while (isRunning) {
