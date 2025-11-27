@@ -800,7 +800,7 @@ private template MakeCallDispatcher(alias fn) {
 
             alias paramSc = storageclasses[i];
             alias paramTy = types[i .. i+1];
-            alias paramId = identifiers[i];
+            enum paramId = identifiers[i];
             alias paramDef = defaultvalues[i];
 
             alias plainParamTy = Unconst!paramTy;
