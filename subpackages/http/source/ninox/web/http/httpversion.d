@@ -39,14 +39,6 @@ enum HttpVersion {
 	HTTP1_1
 }
 
-private static HttpVersion[string] str_to_version;
-static this() {
-	str_to_version = [
-		"HTTP/1.0": HttpVersion.HTTP1_0,
-		"HTTP/1.1": HttpVersion.HTTP1_1,
-	];
-}
-
 /**
  * Parses a http version from a string.
  * 
@@ -56,9 +48,11 @@ static this() {
  * Returns: the http version or $(REF HttpVersion.unknown) if the version string is not known.
  */
 HttpVersion httpVersionFromString(string str) {
-	auto p = str in str_to_version;
-	if (p !is null) return *p;
-	return HttpVersion.unknown;
+	switch (str) {
+		default: return HttpVersion.unknown;
+		case "HTTP/1.0": return HttpVersion.HTTP1_0;
+		case "HTTP/1.1": return HttpVersion.HTTP1_1;
+	}
 }
 
 /**
