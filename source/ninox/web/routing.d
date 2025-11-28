@@ -819,13 +819,18 @@ private template MakeCallDispatcher(alias fn) {
                 );
             }
 
-            static if (paramSc != ParameterStorageClass.none) {
+            static if (
+                paramSc != ParameterStorageClass.none
+                && paramSc != ParameterStorageClass.ref_
+            ) {
                 static assert(
                     0, "Cannot compile dispatcher: disallowed storageclass `" ~ to!string(paramSc)[0 .. $-1] ~ "`"
                         ~ " for parameter `" ~ paramId ~ "`"
                         ~ " on function `" ~ fullyQualifiedName!fn ~ "`"
                 );
             }
+
+            enum isRef = paramSc == ParameterStorageClass.ref_;
 
             import ninox.web.utils : filterUDAs, containsUDA;
             import std.meta : AliasSeq;
@@ -843,6 +848,7 @@ private template MakeCallDispatcher(alias fn) {
                 enum Impl = "req.http.uri," ~ tail;
             }
             else static if (is(plainParamTy == QueryParamBag)) {
+                static assert(isRef, "parameter of QueryParamBag needs to have `ref` storageclass");
                 enum Impl = "req.http.uri.queryparams," ~ tail;
             }
             else static if (is(plainParamTy == HttpMethod)) {

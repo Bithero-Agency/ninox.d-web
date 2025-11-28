@@ -16,8 +16,6 @@ class URI {
 		import std.string : indexOf, split;
 		str = std.uri.decode(str);
 
-		this._queryparams = new QueryParamBag();
-
 		auto i = str.indexOf("?");
 		if (i >= 0) {
 			this._path = str[0 .. i];
@@ -63,7 +61,7 @@ class URI {
 	}
 
 	/// The query params of the uri
-	@property QueryParamBag queryparams() {
+	@property ref QueryParamBag queryparams() {
 		return _queryparams;
 	}
 
@@ -84,7 +82,7 @@ unittest {
 /**
  * Stores query params for an HTTP URL, all keys are case sensitive.
  */
-class QueryParamBag {
+struct QueryParamBag {
 	/// internal assocative array storing the params
 	private string[][string] map;
 
