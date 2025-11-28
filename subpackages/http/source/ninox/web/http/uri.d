@@ -4,11 +4,9 @@ module ninox.web.http.uri;
  * Holds an URI; effectivly just a container/wrapper but as a distinct type so we can better work with it.
  * Utilizes $(REF std.uri) for parsing.
  */
-class URI {
+struct URI {
 	private string _path;
 	private QueryParamBag _queryparams;
-
-	private this() {}
 
 	/// Parses the given string as uri
 	this(string str) {
@@ -67,7 +65,7 @@ class URI {
 
 	/// Parses the given string as uri
 	static URI parse(string str) {
-		return new URI(str);
+		return URI(str);
 	}
 }
 

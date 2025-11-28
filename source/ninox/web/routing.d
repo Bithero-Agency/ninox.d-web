@@ -845,6 +845,7 @@ private template MakeCallDispatcher(alias fn) {
                 enum Impl = "req.http.headers," ~ tail;
             }
             else static if (is(plainParamTy == URI)) {
+                static assert(isRef, "parameter of URI needs to have `ref` storageclass");
                 enum Impl = "req.http.uri," ~ tail;
             }
             else static if (is(plainParamTy == QueryParamBag)) {

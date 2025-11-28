@@ -67,12 +67,12 @@ class Request {
 	}
 
 	/// Returns the URL of the request
-	URI getURI() {
+	ref URI getURI() {
 		return _uri;
 	}
 
 	/// Returns the URL of the request
-	@property URI uri() {
+	@property ref URI uri() {
 		return _uri;
 	}
 
@@ -158,7 +158,7 @@ Request parseRequest(HttpClient client) {
 
 	pos = requestLine.indexOf(' ');
 	if (pos <= 0) throw new RequestParsingException("invalid request path");
-	r._uri = new URI(requestLine[0 .. pos]);
+	r._uri = URI(requestLine[0 .. pos]);
 	requestLine = requestLine[pos+1 .. $];
 
 	r.ver = httpVersionFromString(requestLine);
