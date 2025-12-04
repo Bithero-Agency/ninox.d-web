@@ -35,9 +35,6 @@ import ninox.web.http.uri;
  * Representing a HTTP request message
  */
 class Request {
-	/// The http client the request was parsed from
-	private HttpClient client;
-
 	/// The raw HTTP method; only valid if $(REF method) is $(REF ninox.web.http.method.HttpMethod.custom)
 	private string _raw_method;
 
@@ -56,8 +53,7 @@ class Request {
 	/// The request's body (if one is available)
 	private RequestBody _body = null;
 
-	this(HttpClient client) {
-		this.client = client;
+	this() {
 		this._headers = new HeaderBag();
 	}
 
@@ -141,7 +137,7 @@ class RequestParsingException : Exception {
 Request parseRequest(HttpClient client) {
 	import std.string : indexOf;
 
-	Request r = new Request(client);
+	Request r = new Request();
 
 	// parse the request line
 	auto requestLine = client.readLine();
