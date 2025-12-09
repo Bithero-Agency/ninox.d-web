@@ -7,7 +7,7 @@
 	"dependencies": {
 		"ninox-d_async": "~>1.1.2",
 		"ninox-d_web:http": {
-			"path": "./subpackages/http"
+			"path": "."
 		},
 		"ninox-d_std:optional": "~>1.4.0",
 		"ninox-d_fs": "~>1.0.2"
