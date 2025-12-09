@@ -3,7 +3,7 @@
 	"authors": [
 		"Mai-Lapyst"
 	],
-	"copyright": "Copyright © 2023, Mai-Lapyst",
+	"copyright": "Copyright © 2023-2025, Mai-Lapyst",
 	"dependencies": {
 		"ninox-d_async": "~>1.1.2",
 		"ninox-d_web:http": {
