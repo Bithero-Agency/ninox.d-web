@@ -5,6 +5,6 @@
 		"d-glob": "0.4.0",
 		"ninox-d_async": {"version":"7e0c5f3ed5","repository":"git+https://codearq.net/bithero-dlang/ninox.d-async"},
 		"ninox-d_fs": "1.0.2",
-		"ninox-d_std": "1.7.15"
+		"ninox-d_std": "1.7.16"
 	}
 }
