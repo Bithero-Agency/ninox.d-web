@@ -32,20 +32,21 @@ public import ninox.web.config;
 public import ninox.web.main;
 public import ninox.web.routing;
 public import ninox.web.http;
-public import ninox.web.client;
+import ninox.web.http.socket;
+public import ninox.web.request;
 public import ninox.web.middlewares;
 
 /// Handles one request
-private void handleRequest(NinoxWebHttpClient client, Router router, ServerConfig conf, Request req) {
+private void handleRequest(ref HttpSocket sock, Router router, ServerConfig conf, Request req) {
 	Response resp = router.route(req, conf);
 	if (resp is null) {
 		import std.stdio;
-		writeln("[handleRequest - ", client.getSocket().remoteAddress(), "] routing yielded no response - sending 404");
+		writeln("[handleRequest - ", sock.getSocket().remoteAddress(), "] routing yielded no response - sending 404");
 		resp = new Response(HttpResponseCode.Not_Found_404);
 	}
 
 	if (resp.responseBody !is null) {
-		resp.responseBody.modifyHeaders(resp.headers, client);
+		resp.responseBody.modifyHeaders(resp.headers, sock);
 	}
 
 	if (conf.addDate && !resp.headers.has("Date")) {
@@ -73,7 +74,7 @@ private void handleRequest(NinoxWebHttpClient client, Router router, ServerConfi
 		resp.headers.set("Content-Length", "0");
 	}
 
-	sendResponse(req.httpVersion, resp, client);
+	sendResponse(sock, req.httpVersion, resp);
 }
 
 /** 
@@ -88,15 +89,15 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 	auto peerAddr = sock.remoteAddress();
 
 	try {
-		auto client = new NinoxWebHttpClient(sock);
+		auto httpSock = HttpSocket(sock);
 
-		if (!client.waitForActivity(conf.keep_alive_timeout)) {
+		if (!sock.waitForActivity(conf.keep_alive_timeout)) {
 			// timeout reached without any activity
 			return;
 		}
 
-		Request req = parseRequest(client);
-		handleRequest(client, router, conf, req);
+		Request req = parseRequest(httpSock);
+		handleRequest(httpSock, router, conf, req);
 
 		if (req.httpVersion < HttpVersion.HTTP1_1) {
 			// close connection immedeatly after first request if not HTTP 1.1
@@ -113,13 +114,13 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 				return;
 			}
 
-			if (!client.waitForActivity(conf.keep_alive_timeout)) {
+			if (!sock.waitForActivity(conf.keep_alive_timeout)) {
 				// timeout reached without any activity
 				return;
 			}
 
-			req = parseRequest(client);
-			handleRequest(client, router, conf, req);
+			req = parseRequest(httpSock);
+			handleRequest(httpSock, router, conf, req);
 		}
 
 	} catch (Throwable th) {

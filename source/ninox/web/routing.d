@@ -29,7 +29,7 @@ import ninox.web.http;
 import ninox.web.config;
 import ninox.web.utils;
 import ninox.web.middlewares;
-import ninox.web.client : NinoxWebRequest;
+import ninox.web.request : NinoxWebRequest;
 import ninox.std.optional : Optional;
 
 alias MaybeResponse = Optional!Response;

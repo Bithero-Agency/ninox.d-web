@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Mai-Lapyst
+ * Copyright (C) 2023-2025 Mai-Lapyst
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,14 +19,14 @@
  * Module to hold code for a http response
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
- * Copyright: Copyright (C) 2023 Mai-Lapyst
+ * Copyright: Copyright (C) 2023-2025 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
 module ninox.web.http.response;
 
 import ninox.web.http.httpversion;
-import ninox.web.http.client;
+import ninox.web.http.socket;
 import ninox.web.http.headers;
 import ninox.web.http.body;
 
@@ -265,23 +265,23 @@ class Response {
  * Sends a response to a client.
  * 
  * Params:
+ *   sock = the socket to send to
  *   ver = the http version to use
  *   resp = the response to send
- *   client = the client to send to
  */
-void sendResponse(HttpVersion ver, Response resp, HttpClient client) {
-	client.writeLine(
+void sendResponse(HttpSocket sock, HttpVersion ver, Response resp) {
+	sock.writeLine(
 		httpVersionToString(ver) ~ " " ~ resp.respCode
 	);
 	if (resp._headers !is null) {
 		resp._headers.foreachHeader((key, values) {
 			foreach (val; values) {
-				client.writeLine(key ~ ": " ~ val);
+				sock.writeLine(key ~ ": " ~ val);
 			}
 		});
 	}
-	client.writeLine("");
+	sock.writeLine("");
 	if (resp._respBody !is null) {
-		resp._respBody.sendTo(client);
+		resp._respBody.sendTo(sock);
 	}
 }

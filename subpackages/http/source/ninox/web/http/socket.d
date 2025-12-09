@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Mai-Lapyst
+ * Copyright (C) 2023-2025 Mai-Lapyst
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,55 +16,33 @@
  */
 
 /** 
- * Module to provide the basic interface for an HTTP client
+ * Module to provide the HTTP socket wrapper
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
- * Copyright: Copyright (C) 2023 Mai-Lapyst
+ * Copyright: Copyright (C) 2023-2025 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
-module ninox.web.http.client;
+module ninox.web.http.socket;
 
-/**
- * Interface for HTTP clients; Most implementers actualy want to extend $(REF BaseHttpClient)
- */
-interface HttpClient {
-	/// Reads exactly as many bytes as specified
-	void[] read(size_t count);
-
-	/// Reads one line
-	string readLine();
-
-	/// Writes the buffer
-	void write(const(void)[] buffer);
-
-	/// Writes one line
-	void writeLine(string line);
+version (Have_ninox_d_async) {
+	import ninox.async.io.socket;
+	alias NativeSocket = AsyncSocket;
+}
+else {
+	static assert(0, "Need to have ninox.d-async as an IO provider");
 }
 
 /** 
  * Basic http client that implements all data-accessor wrappers that are needed.
  */
-abstract class BaseHttpClient : HttpClient {
+struct HttpSocket {
 	protected char[] back_buffer;
+	private NativeSocket socket;
 
-	/**
-	 * Reads data from the client
-	 * 
-	 * Params:
-	 *  buffer = buffer to read into; reads at max the length of this
-	 * 
-	 * Returns: the amount of bytes read
-	 */
-	protected abstract size_t nativeRead(scope void[] buffer);
-
-	/**
-	 * Writes data to the client
-	 * 
-	 * Params:
-	 *  buffer = buffer to write
-	 */
-	protected abstract void nativeWrite(scope const(void)[] buffer);
+	this(NativeSocket socket) {
+		this.socket = socket;
+	}
 
 	void[] read(size_t count) {
 		import std.algorithm : min;
@@ -82,7 +60,7 @@ abstract class BaseHttpClient : HttpClient {
 		// if not enough, try recieving from the socket
 		char[1024] buffer;
 		while (count > 0) {
-			size_t received = this.nativeRead(buffer);
+			size_t received = this.socket.recieve(buffer).await();
 
 			size_t n = min(received, count);
 			res ~= buffer[0 .. n];
@@ -145,7 +123,7 @@ abstract class BaseHttpClient : HttpClient {
 		}
 
 		while (true) {
-			received = this.nativeRead(buffer);
+			received = this.socket.recieve(buffer).await();
 
 			auto lineEnd = findLineEnd(buffer, received);
 			if (lineEnd < 0) {
@@ -170,11 +148,15 @@ abstract class BaseHttpClient : HttpClient {
 	}
 
 	void write(const(void)[] buffer) {
-		this.nativeWrite(buffer);
+		this.socket.send(buffer).await();
 	}
 
 	void writeLine(string line) {
-		this.nativeWrite(line ~ "\r\n");
+		this.socket.send(line ~ "\r\n").await();
+	}
+
+	pragma(inline) NativeSocket getSocket() {
+		return this.socket;
 	}
 
 }

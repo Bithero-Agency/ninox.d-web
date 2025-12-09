@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Mai-Lapyst
+ * Copyright (C) 2023-2025 Mai-Lapyst
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,14 +19,14 @@
  * Module to hold all http body types
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
- * Copyright: Copyright (C) 2023 Mai-Lapyst
+ * Copyright: Copyright (C) 2023-2025 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
 module ninox.web.http.body;
 
 import ninox.web.http.headers;
-import ninox.web.http.client;
+import ninox.web.http.socket;
 
 import std.json;
 
@@ -40,18 +40,18 @@ interface ResponseBody {
 	 * 
 	 * Params:
 	 *  headers = headers to modify
-	 *  client = current client
+	 *  sock = current socket
 	 */
-	void modifyHeaders(HeaderBag headers, HttpClient client);
+	void modifyHeaders(HeaderBag headers, ref HttpSocket sock);
 
 	/**
 	 * Called when the body should be send to the client.
 	 * This is an blocking operation.
 	 * 
 	 * Params:
-	 *  client = current client
+	 *  sock = current socket
 	 */
-	void sendTo(HttpClient client);
+	void sendTo(ref HttpSocket sock);
 
 }
 
@@ -67,14 +67,14 @@ class StringBody : ResponseBody {
 		this.mime_type = mime_type;
 	}
 
-	void modifyHeaders(HeaderBag headers, HttpClient client) {
+	void modifyHeaders(HeaderBag headers, ref HttpSocket sock) {
 		import std.conv : to;
 		headers.set("Content-Length", to!string(str.length));
 		headers.set("Content-Type", mime_type);
 	}
 
-	void sendTo(HttpClient client) {
-		client.write(str);
+	void sendTo(ref HttpSocket sock) {
+		sock.write(str);
 	}
 }
 

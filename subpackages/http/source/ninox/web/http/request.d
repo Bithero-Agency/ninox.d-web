@@ -26,7 +26,7 @@
 module ninox.web.http.request;
 
 import ninox.web.http.headers;
-import ninox.web.http.client;
+import ninox.web.http.socket;
 import ninox.web.http.method;
 import ninox.web.http.httpversion;
 import ninox.web.http.uri;
@@ -125,22 +125,22 @@ class RequestParsingException : Exception {
 }
 
 /**
- * Parses a request from the supplied client
+ * Parses a request from the supplied socket
  * 
  * Params:
- *   client = the current client
+ *   sock = the current socket
  * 
  * Returns: the parsed http request
  * 
  * Throws: RequestParsingException if the parsing failed
  */
-Request parseRequest(HttpClient client) {
+Request parseRequest(HttpSocket sock) {
 	import std.string : indexOf;
 
 	Request r = new Request();
 
 	// parse the request line
-	auto requestLine = client.readLine();
+	auto requestLine = sock.readLine();
 	if (requestLine == "PRI * HTTP/2.0") {
 		// TODO: http2 handling.
 		throw new RequestParsingException("HTTP2 is NIY");
@@ -162,7 +162,7 @@ Request parseRequest(HttpClient client) {
 
 	// start header parsing
 	while (true) {
-		auto line = client.readLine();
+		auto line = sock.readLine();
 		debug (ninoxweb_parseRequest) {
 			import std.stdio;
 			writeln("[ninox.web.http.parseRequest] got headerline: ", line);
@@ -206,7 +206,7 @@ Request parseRequest(HttpClient client) {
 		import std.conv : to;
 		size_t contentLength = to!size_t( r._headers.getOne("Content-Length") );
 		r._body = new RequestBody();
-		r._body.buffer = client.read(contentLength);
+		r._body.buffer = sock.read(contentLength);
 	}
 
 	if (r.ver == HttpVersion.HTTP1_1 && !r._headers.has("Host")) {
