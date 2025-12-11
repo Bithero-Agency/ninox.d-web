@@ -200,11 +200,11 @@ class HeaderBag {
 
 	int opApply(scope int delegate(string, ref string) dg) {
 		int result = 0;
-		foreach (key, ref vals; this.map) {
+		outer: foreach (key, ref vals; this.map) {
 			foreach (ref val; vals) {
 				result = dg(key.data, val);
 				if (result)
-					break;
+					break outer;
 			}
 		}
 		return result;
