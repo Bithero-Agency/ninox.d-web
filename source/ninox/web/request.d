@@ -29,6 +29,7 @@ import ninox.async.io.socket;
 import std.variant;
 import std.datetime : Duration;
 import ninox.web.http.request;
+import ninox.web.di;
 
 class NinoxWebRequest {
 	private Request _http_request;
@@ -42,12 +43,20 @@ class NinoxWebRequest {
 	/// Stores the mime_type this request consumes
 	public string consumes;
 
-	this(Request http_request) {
+	/// Reference to the di container to use;
+	private DiContainer* _di;
+
+	this(Request http_request, ref DiContainer di) {
 		this._http_request = http_request;
+		this._di = &di;
 	}
 
 	@property Request http() {
 		return this._http_request;
+	}
+
+	pragma(inline) @property ref DiContainer di() {
+		return *this._di;
 	}
 
 	string getPathParam(string key) {

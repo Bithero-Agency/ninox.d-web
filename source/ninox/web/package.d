@@ -35,10 +35,11 @@ public import ninox.web.http;
 import ninox.web.http.socket;
 public import ninox.web.request;
 public import ninox.web.middlewares;
+public import ninox.web.di;
 
 /// Handles one request
-private void handleRequest(ref HttpSocket sock, Router router, ServerConfig conf, Request req) {
-	Response resp = router.route(req, conf);
+private void handleRequest(ref HttpSocket sock, Router router, ServerConfig conf, Request req, ref DiContainer di) {
+	Response resp = router.route(req, conf, di);
 	if (resp is null) {
 		import std.stdio;
 		writeln("[handleRequest - ", sock.getSocket().remoteAddress(), "] routing yielded no response - sending 404");
@@ -84,8 +85,9 @@ private void handleRequest(ref HttpSocket sock, Router router, ServerConfig conf
  *   sock = the client's socket
  *   router = the router instance
  *   conf = the server config
+ *   di = the di container
  */
-private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
+private void handleClient(AsyncSocket sock, Router router, ServerConfig conf, ref DiContainer di) {
 	auto peerAddr = sock.remoteAddress();
 
 	try {
@@ -97,7 +99,7 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 		}
 
 		Request req = parseRequest(httpSock);
-		handleRequest(httpSock, router, conf, req);
+		handleRequest(httpSock, router, conf, req, di);
 
 		if (req.httpVersion < HttpVersion.HTTP1_1) {
 			// close connection immedeatly after first request if not HTTP 1.1
@@ -120,7 +122,7 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 			}
 
 			req = parseRequest(httpSock);
-			handleRequest(httpSock, router, conf, req);
+			handleRequest(httpSock, router, conf, req, di);
 		}
 
 	} catch (Throwable th) {
@@ -129,9 +131,9 @@ private void handleClient(AsyncSocket sock, Router router, ServerConfig conf) {
 	}
 }
 
-private void handleClientAsync(AsyncSocket client, Router r, ServerConfig conf) {
+private void handleClientAsync(AsyncSocket client, Router r, ServerConfig conf, ref DiContainer di) {
 	gscheduler.schedule(() {
-		handleClient(client, r, conf);
+		handleClient(client, r, conf, di);
 		client.shutdownSync(SocketShutdown.BOTH);
 		client.closeSync();
 	});
@@ -146,7 +148,7 @@ private void handleClientAsync(AsyncSocket client, Router r, ServerConfig conf) 
  * 
  * Returns: exitstatus of ninox.d-web
  */
-int ninoxwebRunServer(ServerConfig conf, Router r) {
+int ninoxwebRunServer(ServerConfig conf, Router r, ref DiContainer di) {
 	auto listener = new AsyncSocket(AddressFamily.INET, SocketType.STREAM);
 	listener.bind(conf.addr);
 	listener.listen(conf.listen_backlog);

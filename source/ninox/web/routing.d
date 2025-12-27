@@ -30,6 +30,7 @@ import ninox.web.config;
 import ninox.web.utils;
 import ninox.web.middlewares;
 import ninox.web.request : NinoxWebRequest;
+import ninox.web.di;
 import ninox.std.optional : Optional;
 
 alias MaybeResponse = Optional!Response;
@@ -675,8 +676,8 @@ class Router {
     private RouteEntry[] routes;
     private Callable!MaybeResponse[string] middlewares;
 
-    Response route(Request http_req, ServerConfig conf) {
-        NinoxWebRequest req = new NinoxWebRequest(http_req);
+    Response route(Request http_req, ServerConfig conf, ref DiContainer di) {
+        NinoxWebRequest req = new NinoxWebRequest(http_req, di);
 
         RoutingStore store;
         foreach (ent; routes) {
@@ -981,6 +982,13 @@ private template MakeCallDispatcher(alias fn) {
                             ~ " but is not of type `string`: " ~ fullyQualifiedName!paramTy
                     );
                 }
+            }
+            else static if (is(plainParamTy == DiContainer)) {
+                static assert(isRef, "parameter of type DiContainer needs to have `ref` storageclass");
+                enum Impl = "req.di," ~ tail;
+            }
+            else static if (containsUDA!(Inject, paramUdas)) {
+                enum Impl = buildInject!("req.di", paramId, plainParamTy, paramUdas) ~ "," ~ tail;
             }
             else static if (hasStaticMember!(plainParamTy, "fromRequest")) {
                 alias fromRequest = __traits(getMember, plainParamTy, "fromRequest");

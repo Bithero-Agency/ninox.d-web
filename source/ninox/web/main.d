@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Mai-Lapyst
+ * Copyright (C) 2023-2025 Mai-Lapyst
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,7 +19,7 @@
  * Module to hold code to reduce boilerplate code
  * 
  * License:   $(HTTP https://www.gnu.org/licenses/agpl-3.0.html, AGPL 3.0).
- * Copyright: Copyright (C) 2023 Mai-Lapyst
+ * Copyright: Copyright (C) 2023-2025 Mai-Lapyst
  * Authors:   $(HTTP codeark.it/Mai-Lapyst, Mai-Lapyst)
  */
 
@@ -112,28 +112,60 @@ template NinoxWebAsyncMain(Modules...) {
  */
 template NinoxWebStartup(Modules...) {
 	import std.meta : AliasSeq;
-	import std.traits : getSymbolsByUDA, isFunction, ReturnType, Parameters;
+	import std.traits : getSymbolsByUDA, isFunction, ReturnType, Parameters,
+		ParameterIdentifierTuple, ParameterStorageClassTuple, ParameterStorageClass,
+		fullyQualifiedName, Unconst;
 	import ninox.web.config;
+	import ninox.web.di;
 
 	alias allMods = AliasSeq!(Modules);
 
 	int ninoxWebStartup() {
 		ServerConfig conf = new ServerConfig();
+		DiContainer container;
 
-		foreach (mod; allMods) {
-			foreach (fn; getSymbolsByUDA!(mod, OnServerStart)) {
+		template MakeCall(string name, alias fn)
+		{
+			alias storageclasses = ParameterStorageClassTuple!fn;
+			alias types = Parameters!fn;
+			alias identifiers = ParameterIdentifierTuple!fn;
+
+			template Impl(size_t i = 0) {
+				static if (i == types.length) {
+					enum Impl = "";
+				} else {
+					alias tail = Impl!(i+1);
+
+					alias paramSc = storageclasses[i];
+					alias paramTy = types[i .. i+1];
+					enum paramId = identifiers[i];
+					enum isRef = paramSc == ParameterStorageClass.ref_;
+					alias plainParamTy = Unconst!paramTy;
+
+					static if (is(plainParamTy == ServerConfig)) {
+						enum Impl = "conf," ~ tail;
+					}
+					else static if (is(plainParamTy == DiContainer)) {
+						static assert(isRef, "parameter of type DiContainer needs to have `ref` storageclass");
+						enum Impl = "container, " ~ tail;
+					}
+					else {
+						static assert(
+							0, "Cannot compile call for " ~ name ~ ": unknown type `" ~ fullyQualifiedName!paramTy ~ "`"
+								~ " for parameter `" ~ paramId ~ "`"
+								~ " on function `" ~ fullyQualifiedName!fn ~ "`"
+						);
+					}
+				}
+			}
+			enum MakeCall = Impl!();
+		}
+
+		static foreach (mod; allMods) {
+			static foreach (fn; getSymbolsByUDA!(mod, OnServerStart)) {
 				static assert(isFunction!fn, "`" ~ __traits(identifier, fn) ~ "` is annotated with OnServerStart but is not a function");
 				static assert(is(ReturnType!fn == void), "`" ~ __traits(identifier, fn) ~ "` needs to have a return value of `void`");
-
-				static if (is(Parameters!fn == AliasSeq!(ServerConfig))) {
-					fn(conf);
-				}
-				else static if (is(Parameters!fn == AliasSeq!())) {
-					fn();
-				}
-				else {
-					assert(false, "`" ~ __traits(identifier, fn) ~ "` needs either have no parameters or only one of type `ninox.web.config.ServerConfig`");
-				}
+				mixin("fn(" ~ MakeCall!("OnServerStart", fn) ~ ");");
 			}
 		}
 
@@ -142,22 +174,13 @@ template NinoxWebStartup(Modules...) {
 
 		Router router = initRouter!(allMods)(conf);
 
-		int exitCode = ninoxwebRunServer(conf, router);
+		int exitCode = ninoxwebRunServer(conf, router, container);
 
-		foreach (mod; allMods) {
-			foreach (fn; getSymbolsByUDA!(mod, OnServerShutdown)) {
+		static foreach (mod; allMods) {
+			static foreach (fn; getSymbolsByUDA!(mod, OnServerShutdown)) {
 				static assert(isFunction!fn, "`" ~ __traits(identifier, fn) ~ "` is annotated with OnServerShutdown but is not a function");
 				static assert(is(ReturnType!fn == void), "`" ~ __traits(identifier, fn) ~ "` needs to have a return value of `void`");
-
-				static if (is(Parameters!fn == AliasSeq!(ServerConfig))) {
-					fn(conf);
-				}
-				else static if (is(Parameters!fn == AliasSeq!())) {
-					fn();
-				}
-				else {
-					assert(false, "`" ~ __traits(identifier, fn) ~ "` needs either have no parameters or only one of type `ninox.web.config.ServerConfig`");
-				}
+				mixin("fn(" ~ MakeCall!("OnServerStart", fn) ~ ");");
 			}
 		}
 
