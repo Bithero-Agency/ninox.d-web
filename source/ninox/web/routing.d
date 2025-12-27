@@ -1237,7 +1237,7 @@ Router initRouter(Modules...)(ServerConfig conf) {
     static foreach (mod; Modules) {
         static foreach (fn; getSymbolsByUDA!(mod, RegisterMiddleware)) {
             static assert(isFunction!fn, "`" ~ __traits(identifier, fn) ~ "` is annotated with @RegisterMiddleware but isn't a function");
-            static foreach (uda; getUDAs!(fn, RegisterMiddleware)) {
+            static foreach (uda; getUDAs!(fn, RegisterMiddleware)) {{
                 auto p = uda.name in r.middlewares;
                 if (p !is null) {
                     assert(0, "Cannot register `" ~ fullyQualifiedName!fn ~ "` as middleware `" ~ uda.name ~ "` since a same named middleware already exists");
@@ -1260,10 +1260,10 @@ Router initRouter(Modules...)(ServerConfig conf) {
                 else {
                     static assert(0, "`" ~ fullyQualifiedName!fn ~ "` needs to have either void or Optional!Response as returntype");
                 }
-            }
+            }}
         }
 
-        static foreach (fn; getSymbolsByUDA!(mod, Route)) {
+        static foreach (fn; getSymbolsByUDA!(mod, Route)) {{
             static assert(isFunction!fn, "`" ~ __traits(identifier, fn) ~ "` is annotated with @Route but isn't a function");
 
             static assert(!hasUDA!(fn, Header), "`@Header` cannot be applied to a function directly: " ~ fullyQualifiedName!fn);
@@ -1286,8 +1286,7 @@ Router initRouter(Modules...)(ServerConfig conf) {
             }
 
             addRoute!(fn, args, Modules)(r, middlewares);
-
-        }
+        }}
     }
 
     foreach (pubDir; conf.publicdir_mappings) {
